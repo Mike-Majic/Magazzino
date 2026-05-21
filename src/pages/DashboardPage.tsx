@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { inventoryRows } from '../data';
+import { initialInventoryRows } from '../data';
 
 const statusLabels: Record<string, string> = {
   giacente: 'Giacenti',
@@ -19,7 +19,7 @@ export function DashboardPage() {
     return Object.entries(statusLabels).map(([status, label]) => ({
       status,
       title: label,
-      value: inventoryRows.filter((row) => row.status === status).length
+      value: initialInventoryRows.filter((row) => row.status === status).length
     }));
   }, []);
 

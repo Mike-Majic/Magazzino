@@ -60,34 +60,23 @@ export function InventoryPage() {
 
   const logMovement = (row: InventoryRow, action: string) => {
     const { date, time } = formatNow();
-    setMovements((prev) => [
-      {
-        id: Date.now() + Math.floor(Math.random() * 1000),
-        date,
-        time,
-        user: 'operatore',
-        serial: row.serial,
-        action,
-        technician: row.assignedTo,
-        notes: row.notes,
-        attachmentName: row.attachmentName
-      },
-      ...prev
-    ]);
-    localStorage.setItem('movements_log', JSON.stringify([
-      {
-        id: Date.now(),
-        date,
-        time,
-        user: 'operatore',
-        serial: row.serial,
-        action,
-        technician: row.assignedTo,
-        notes: row.notes,
-        attachmentName: row.attachmentName
-      },
-      ...movements
-    ]));
+    const entry: MovementRow = {
+      id: Date.now() + Math.floor(Math.random() * 1000),
+      date,
+      time,
+      user: 'operatore',
+      serial: row.serial,
+      action,
+      technician: row.assignedTo,
+      notes: row.notes,
+      attachmentName: row.attachmentName
+    };
+
+    setMovements((prev) => {
+      const next = [entry, ...prev];
+      localStorage.setItem('movements_log', JSON.stringify(next));
+      return next;
+    });
   };
 
   const registerModem = (event: FormEvent) => {
@@ -100,14 +89,12 @@ export function InventoryPage() {
   };
 
   const updateRow = (id: number, patch: Partial<InventoryRow>, action: string) => {
-    setRows((prev) =>
-      prev.map((r) => {
-        if (r.id !== id) return r;
-        const updated = { ...r, ...patch };
-        logMovement(updated, action);
-        return updated;
-      })
-    );
+    const current = rows.find((r) => r.id === id);
+    if (!current) return;
+    const updated = { ...current, ...patch };
+
+    setRows((prev) => prev.map((r) => (r.id === id ? updated : r)));
+    logMovement(updated, action);
   };
 
   const openAttachmentPicker = (rowId: number) => {
