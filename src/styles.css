@@ -1,0 +1,15 @@
+:root { font-family: Inter, system-ui, sans-serif; color: #0f172a; background: #f8fafc; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+.layout { min-height: 100vh; display: grid; grid-template-columns: 260px 1fr; }
+.sidebar { background: #0b1324; color: #e2e8f0; padding: 1rem; }
+.sidebar nav { display: grid; gap: .5rem; margin-top: 1rem; }
+.sidebar a { color: #cbd5e1; text-decoration: none; padding: .55rem .75rem; border-radius: .5rem; }
+.sidebar a.active, .sidebar a:hover { background: #1d4ed8; color: white; }
+.content { padding: 1rem; }
+.grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .8rem; }
+.card { background: white; border-radius: .75rem; padding: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,.08); display: grid; gap: .35rem; }
+.card span { font-size: 1.6rem; font-weight: 700; }
+table { width: 100%; border-collapse: collapse; background: white; }
+th, td { border-bottom: 1px solid #e2e8f0; padding: .55rem; text-align: left; }
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
