@@ -1,46 +1,51 @@
+export type Role = 'Admin' | 'Magazzino' | 'Tecnico' | 'Sola lettura';
+
+export type UserRow = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  role: Role;
+};
+
+export type InventoryStatus =
+  | 'giacente'
+  | 'assegnato'
+  | 'installato'
+  | 'da_riconsegnare'
+  | 'riconsegnato'
+  | 'guasto'
+  | 'scaricato';
+
 export type InventoryRow = {
+  id: number;
   serial: string;
   model: string;
   sap: string;
-  status: 'giacente' | 'assegnato' | 'installato' | 'da_riconsegnare' | 'riconsegnato' | 'guasto' | 'scaricato';
+  status: InventoryStatus;
   assignedTo: string;
   notes: string;
+  attachmentName?: string;
 };
 
 export type MovementRow = {
+  id: number;
   date: string;
+  time: string;
   user: string;
   serial: string;
-  from: string;
-  to: string;
+  action: string;
   technician: string;
   notes: string;
+  attachmentName?: string;
 };
 
-export const inventoryRows: InventoryRow[] = [
-  { serial: 'F2401DH90004065', model: 'NEXXT GPON', sap: '100456', status: 'giacente', assignedTo: '-', notes: 'Disponibile' },
-  { serial: 'CP2518JETCA', model: 'NEXXT SEVEN GPON', sap: '100693', status: 'assegnato', assignedTo: 'NICO', notes: 'Consegna urgente' },
-  { serial: 'R19100000092737', model: 'VDF Wifi 5', sap: 'VDF5', status: 'installato', assignedTo: 'FINOCCHI', notes: 'Account 96417557' },
-  { serial: 'ZTEEGAFPBH00868', model: 'NEXXT ONE LITE IAD', sap: '100599', status: 'da_riconsegnare', assignedTo: 'DENIS', notes: 'Rientro pianificato' }
+export const seededUsers: UserRow[] = [
+  { id: 1, firstName: 'Michael', lastName: 'Colurci', role: 'Tecnico' },
+  { id: 2, firstName: 'Simone', lastName: "D'Alessandro", role: 'Tecnico' }
 ];
 
-export const movementRows: MovementRow[] = [
-  {
-    date: '21/05/2026',
-    user: 'admin',
-    serial: 'F2401DH90004065',
-    from: 'giacente',
-    to: 'assegnato',
-    technician: 'NICO',
-    notes: 'Assegnato per installazione'
-  },
-  {
-    date: '21/05/2026',
-    user: 'magazzino',
-    serial: 'CP2518JETCA',
-    from: 'assegnato',
-    to: 'installato',
-    technician: 'FINOCCHI',
-    notes: 'Installazione completata'
-  }
+export const initialInventoryRows: InventoryRow[] = [
+  { id: 1, serial: 'F2401DH90004065', model: 'NEXXT GPON', sap: '100456', status: 'giacente', assignedTo: '-', notes: 'Disponibile' },
+  { id: 2, serial: 'CP2518JETCA', model: 'NEXXT SEVEN GPON', sap: '100693', status: 'assegnato', assignedTo: 'Michael Colurci', notes: 'Consegna urgente' },
+  { id: 3, serial: 'R19100000092737', model: 'VDF Wifi 5', sap: 'VDF5', status: 'installato', assignedTo: 'Simone D\'Alessandro', notes: 'Account 96417557' }
 ];
