@@ -16,7 +16,6 @@ export function App() {
     <div className="layout">
       <aside className="sidebar">
         <h1>Magazzino Modem</h1>
-        <p>Bozza iniziale React + Supabase</p>
         <nav>
           {navItems.map((item) => (
             <NavLink key={item.to} to={item.to} className={({ isActive }) => (isActive ? 'active' : '')}>
