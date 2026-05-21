@@ -1,0 +1,31 @@
+:root { font-family: Inter, system-ui, sans-serif; color: #0f172a; background: #f8fafc; font-size: 13px; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+.layout { min-height: 100vh; display: grid; grid-template-columns: 220px 1fr; }
+.sidebar { background: #0b1324; color: #e2e8f0; padding: .85rem; }
+.sidebar h1 { font-size: 1.05rem; margin: 0 0 .8rem; }
+.sidebar nav { display: grid; gap: .4rem; }
+.sidebar a { color: #cbd5e1; text-decoration: none; padding: .45rem .6rem; border-radius: .45rem; font-size: .9rem; }
+.sidebar a.active, .sidebar a:hover { background: #1d4ed8; color: white; }
+.content { padding: .8rem; }
+h2 { margin: 0 0 .6rem; font-size: 1.1rem; }
+.grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .6rem; }
+.card { background: white; border-radius: .6rem; padding: .75rem; box-shadow: 0 1px 4px rgba(0,0,0,.08); display: grid; gap: .2rem; border: 1px solid #e2e8f0; }
+.card span { font-size: 1.35rem; font-weight: 700; }
+.card-button { text-align: left; cursor: pointer; }
+.new-modem-form { display: grid; grid-template-columns: 1.3fr 1fr .6fr .9fr .8fr 1.4fr auto; gap: .35rem; margin-bottom: .5rem; }
+.new-modem-form input, .new-modem-form select, .new-modem-form button, .search-input { padding: .35rem .45rem; border: 1px solid #cbd5e1; border-radius: .35rem; font-size: .82rem; }
+.new-modem-form button { background: #1d4ed8; color: white; border-color: #1d4ed8; }
+.search-input { width: 100%; max-width: 520px; margin: 0 0 .5rem; }
+.table-wrap { overflow: auto; background: white; border: 1px solid #d7dee8; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+th, td { border-bottom: 1px solid #e2e8f0; padding: .28rem .35rem; text-align: left; font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.with-separators th, .with-separators td { border-right: 1px solid #d5dce8; }
+.with-separators th:last-child, .with-separators td:last-child { border-right: none; }
+th { position: relative; }
+th .resize-handle { position: absolute; right: -3px; top: 0; width: 6px; height: 100%; cursor: col-resize; user-select: none; }
+th .resize-handle:hover { background: #93c5fd; }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .new-modem-form { grid-template-columns: 1fr 1fr; }
+}
