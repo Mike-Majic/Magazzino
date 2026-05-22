@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { initialInventoryRows, InventoryRow, InventoryStatus } from '../data';
 
-const labels: Record<InventoryStatus, string> = { da_assegnare: 'Da assegnare', assegnato: 'Assegnato', installato: 'Installato', da_riconsegnare: 'Da riconsegnare', denunciato: 'Denunciato' };
-const statuses: InventoryStatus[] = ['da_assegnare', 'assegnato', 'installato', 'da_riconsegnare', 'denunciato'];
+const labels: Record<InventoryStatus, string> = { da_assegnare: 'Da assegnare', assegnato: 'Assegnato', installato: 'Installato', da_riconsegnare: 'Da riconsegnare', riconsegnato: 'Riconsegnato', denunciato: 'Denunciato' };
+const statuses: InventoryStatus[] = ['da_assegnare', 'assegnato', 'installato', 'da_riconsegnare', 'riconsegnato', 'denunciato'];
 
 export function InstalledModemsPage() {
   const [rows, setRows] = useState<InventoryRow[]>(initialInventoryRows);

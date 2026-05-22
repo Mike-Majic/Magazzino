@@ -12,7 +12,7 @@ export type UserRow = {
 
 export type SapItem = { id: number; sapCode: string; modelName: string; provider: string };
 
-export type InventoryStatus = 'da_assegnare' | 'assegnato' | 'installato' | 'da_riconsegnare' | 'denunciato';
+export type InventoryStatus = 'da_assegnare' | 'assegnato' | 'installato' | 'da_riconsegnare' | 'riconsegnato' | 'denunciato';
 
 export type InventoryRow = {
   id: number;
