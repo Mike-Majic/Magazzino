@@ -7,6 +7,13 @@ export type UserRow = {
   role: Role;
 };
 
+export type SapItem = {
+  id: number;
+  sapCode: string;
+  modelName: string;
+  provider: string;
+};
+
 export type InventoryStatus =
   | 'giacente'
   | 'assegnato'
@@ -25,6 +32,7 @@ export type InventoryRow = {
   assignedTo: string;
   notes: string;
   attachmentName?: string;
+  attachmentUrl?: string;
 };
 
 export type MovementRow = {
@@ -37,11 +45,19 @@ export type MovementRow = {
   technician: string;
   notes: string;
   attachmentName?: string;
+  attachmentUrl?: string;
 };
 
 export const seededUsers: UserRow[] = [
   { id: 1, firstName: 'Michael', lastName: 'Colurci', role: 'Tecnico' },
   { id: 2, firstName: 'Simone', lastName: "D'Alessandro", role: 'Tecnico' }
+];
+
+export const defaultSapCatalog: SapItem[] = [
+  { id: 1, sapCode: '100455', modelName: 'NEXXT IAD', provider: 'FW' },
+  { id: 2, sapCode: '100456', modelName: 'NEXXT GPON', provider: 'FW' },
+  { id: 3, sapCode: '100599', modelName: 'NEXXT ONE LITE IAD', provider: 'FW' },
+  { id: 4, sapCode: 'VDF5', modelName: 'VDF Wifi 5', provider: 'VDF' }
 ];
 
 export const initialInventoryRows: InventoryRow[] = [
