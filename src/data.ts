@@ -11,6 +11,7 @@ export type UserRow = {
 };
 
 export type SapItem = { id: number; sapCode: string; modelName: string; provider: string };
+export type CompanyItem = { id: number; name: string };
 
 export type InventoryStatus = 'da_assegnare' | 'assegnato' | 'installato' | 'da_riconsegnare' | 'riconsegnato' | 'denunciato';
 
@@ -21,6 +22,7 @@ export type InventoryRow = {
   sap: string;
   status: InventoryStatus;
   assignedTo: string;
+  provenance: string;
   notes: string;
   createdAt: string;
   attachmentName?: string;
@@ -33,6 +35,9 @@ export type MovementRow = {
   time: string;
   user: string;
   serial: string;
+  sap: string;
+  status: InventoryStatus;
+  provenance: string;
   action: string;
   technician: string;
   notes: string;
@@ -43,6 +48,11 @@ export type MovementRow = {
 export const seededUsers: UserRow[] = [
   { id: 1, firstName: 'Michael', lastName: 'Colurci', role: 'Admin', jobRole: 'Admin', locked: true },
   { id: 2, firstName: 'Simone', lastName: "D'Alessandro", role: 'Tecnico', jobRole: 'Tecnico' }
+];
+
+export const seededCompanies: CompanyItem[] = [
+  { id: 1, name: 'SIELTE' },
+  { id: 2, name: 'SACI GROUP' }
 ];
 
 export const defaultSapCatalog: SapItem[] = [
@@ -100,8 +110,8 @@ export const defaultSapCatalog: SapItem[] = [
 ];
 
 export const initialInventoryRows: InventoryRow[] = [
-  { id: 1, serial: 'F2401DH90004065', model: 'NEXXT GPON', sap: '100456', status: 'da_assegnare', assignedTo: '-', notes: 'Disponibile', createdAt: '2026-05-20' },
-  { id: 2, serial: 'CP2518JETCA', model: 'NEXXT SEVEN GPON', sap: '100693', status: 'assegnato', assignedTo: 'Michael Colurci', notes: 'Consegna urgente', createdAt: '2026-05-20' },
-  { id: 3, serial: 'R19100000092737', model: 'VDF Wifi 5', sap: 'VDF5', status: 'installato', assignedTo: 'Simone D\'Alessandro', notes: 'Account 96417557', createdAt: '2026-05-21' },
-  { id: 4, serial: 'ZX001', model: 'WIND', sap: 'WIND', status: 'da_riconsegnare', assignedTo: 'Simone D\'Alessandro', notes: 'Rientro atteso', createdAt: '2026-05-22' }
+  { id: 1, serial: 'F2401DH90004065', model: 'NEXXT GPON', sap: '100456', status: 'da_assegnare', assignedTo: '-', provenance: 'SIELTE', notes: 'Disponibile', createdAt: '2026-05-20' },
+  { id: 2, serial: 'CP2518JETCA', model: 'NEXXT SEVEN GPON', sap: '100693', status: 'assegnato', assignedTo: 'Michael Colurci', provenance: 'SACI GROUP', notes: 'Consegna urgente', createdAt: '2026-05-20' },
+  { id: 3, serial: 'R19100000092737', model: 'VDF Wifi 5', sap: 'VDF5', status: 'installato', assignedTo: 'Simone D\'Alessandro', provenance: 'SIELTE', notes: 'Account 96417557', createdAt: '2026-05-21' },
+  { id: 4, serial: 'ZX001', model: 'WIND', sap: 'WIND', status: 'da_riconsegnare', assignedTo: 'Simone D\'Alessandro', provenance: 'SACI GROUP', notes: 'Rientro atteso', createdAt: '2026-05-22' }
 ];

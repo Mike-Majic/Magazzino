@@ -26,7 +26,7 @@ export function InstalledModemsPage() {
         .filter((r) => r.status === 'installato')
         .filter(
           (r) =>
-            (!search || [r.serial, r.model, r.sap, r.assignedTo, r.notes].join(' ').toLowerCase().includes(search.toLowerCase())) &&
+            (!search || [r.serial, r.model, r.sap, r.assignedTo, r.provenance, r.notes].join(' ').toLowerCase().includes(search.toLowerCase())) &&
             (!fromDate || r.createdAt >= fromDate) &&
             (!toDate || r.createdAt <= toDate)
         ),
@@ -35,8 +35,8 @@ export function InstalledModemsPage() {
 
   const exp = () => {
     const csv =
-      'seriale,modello,sap,stato,tecnico,note,data\n' +
-      filtered.map((r) => `${r.serial},${r.model},${r.sap},${labels[r.status]},${r.assignedTo},${r.notes},${r.createdAt}`).join('\n');
+      'seriale,modello,sap,stato,tecnico,provenienza,note,data\n' +
+      filtered.map((r) => `${r.serial},${r.model},${r.sap},${labels[r.status]},${r.assignedTo},${r.provenance},${r.notes},${r.createdAt}`).join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
     a.download = 'installati.csv';
@@ -65,7 +65,7 @@ export function InstalledModemsPage() {
                   {statuses.map((s) => <option key={s} value={s}>{labels[s]}</option>)}
                 </select>
               </td>
-              <td>{r.assignedTo}</td><td>{r.notes}</td>
+              <td>{r.assignedTo}</td><td>{r.provenance}</td><td>{r.notes}</td>
             </tr>
           ))}
         </tbody>

@@ -30,17 +30,17 @@ export function MovementsPage() {
         <input className="search-input" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cerca in tutti i movimenti" />
         <input type="date" className="modern-input" value={fromDate} onChange={(event) => setFromDate(event.target.value)} />
         <input type="date" className="modern-input" value={toDate} onChange={(event) => setToDate(event.target.value)} />
-        <button type="button" className="modern-export-btn" onClick={() => { const csv = 'data,ora,utente,seriale,azione,tecnico,note\n' + filteredRows.map(r => `${r.date},${r.time},${r.user},${r.serial},${r.action},${r.technician},${r.notes}`).join('\n'); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='movimenti.csv'; a.click(); }}>Export Excel/CSV</button>
+        <button type="button" className="modern-export-btn" onClick={() => { const csv = 'data,ora,utente,seriale,sap,stato,provenienza,azione,tecnico,note\n' + filteredRows.map(r => `${r.date},${r.time},${r.user},${r.serial},${r.sap},${r.status},${r.provenance},${r.action},${r.technician},${r.notes}`).join('\n'); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='movimenti.csv'; a.click(); }}>Export Excel/CSV</button>
               <button type="button" className="icon-btn danger" title="Reset log" onClick={() => { if (window.confirm('Resettare tutti i movimenti?')) { setRows([]); localStorage.removeItem('movements_log'); } }}>🧹 Reset log</button>
       </div>
       <table className="compact-table with-separators">
         <thead>
-          <tr><th>Data</th><th>Ora</th><th>Utente</th><th>Seriale</th><th>Azione</th><th>Tecnico</th><th>Note</th><th>Allegato</th></tr>
+          <tr><th>Data</th><th>Ora</th><th>Utente</th><th>Seriale</th><th>SAP</th><th>Stato</th><th>Provenienza</th><th>Azione</th><th>Tecnico</th><th>Note</th><th>Allegato</th></tr>
         </thead>
         <tbody>
           {filteredRows.map((row) => (
             <tr key={row.id}>
-              <td>{row.date}</td><td>{row.time}</td><td>{row.user}</td><td>{row.serial}</td><td>{row.action}</td><td>{row.technician}</td><td>{row.notes}</td>
+              <td>{row.date}</td><td>{row.time}</td><td>{row.user}</td><td>{row.serial}</td><td>{row.sap}</td><td>{row.status}</td><td>{row.provenance}</td><td>{row.action}</td><td>{row.technician}</td><td>{row.notes}</td>
               <td className="attachment-cell">{row.attachmentUrl ? <button type="button" className="icon-btn" onClick={() => window.open(row.attachmentUrl, '_blank')}>👁️</button> : '-'}</td>
             </tr>
           ))}
