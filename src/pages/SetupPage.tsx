@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { defaultSapCatalog, Role, SapItem, seededUsers, UserRow } from '../data';
+import { defaultSapCatalog, initialInventoryRows, Role, SapItem, seededUsers, UserRow } from '../data';
 
 const roles: Role[] = ['Admin', 'Magazzino', 'Tecnico', 'Sola lettura'];
 
@@ -21,14 +21,24 @@ export function SetupPage() {
     if (storedSap) setSapCatalog(JSON.parse(storedSap));
   }, []);
 
+  const persistUsers = (next: UserRow[]) => {
+    setUsers(next);
+    localStorage.setItem('users_registry', JSON.stringify(next));
+  };
+
   const addUser = (event: FormEvent) => {
     event.preventDefault();
     if (!firstName.trim() || !lastName.trim()) return;
-    const next = [...users, { id: Date.now(), firstName: firstName.trim(), lastName: lastName.trim(), role }];
-    setUsers(next);
-    localStorage.setItem('users_registry', JSON.stringify(next));
+    persistUsers([...users, { id: Date.now(), firstName: firstName.trim(), lastName: lastName.trim(), role }]);
     setFirstName(''); setLastName(''); setRole('Tecnico');
   };
+
+  const updateUser = (id: number, patch: Partial<UserRow>) => {
+    const next = users.map((u) => (u.id === id ? { ...u, ...patch } : u));
+    persistUsers(next);
+  };
+
+  const removeUser = (id: number) => persistUsers(users.filter((u) => u.id !== id));
 
   const addSap = (event: FormEvent) => {
     event.preventDefault();
@@ -45,6 +55,8 @@ export function SetupPage() {
     localStorage.setItem('sap_catalog', JSON.stringify(next));
   };
 
+  const installedModems = initialInventoryRows.filter((row) => row.status === 'installato');
+
   return (
     <section>
       <h2>Setup progetto</h2>
@@ -54,14 +66,26 @@ export function SetupPage() {
         <li>Importare i dati Excel tramite script ETL (step documentato in docs/analysis-and-plan.md).</li>
       </ol>
 
-      <h3>Utenti</h3>
+      <h3>Utenze (aggiungi / modifica / elimina)</h3>
       <form className="users-form" onSubmit={addUser}>
         <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Nome" />
         <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Cognome" />
         <select value={role} onChange={(e) => setRole(e.target.value as Role)}>{roles.map((r) => <option key={r} value={r}>{r}</option>)}</select>
         <button type="submit">Registra utente</button>
       </form>
-      <table className="compact-table with-separators"><thead><tr><th>Nome</th><th>Cognome</th><th>Mansione</th></tr></thead><tbody>{users.map((u) => <tr key={u.id}><td>{u.firstName}</td><td>{u.lastName}</td><td>{u.role}</td></tr>)}</tbody></table>
+      <table className="compact-table with-separators">
+        <thead><tr><th>Nome</th><th>Cognome</th><th>Mansione</th><th>Azioni</th></tr></thead>
+        <tbody>
+          {users.map((u) => (
+            <tr key={u.id}>
+              <td><input value={u.firstName} onChange={(e) => updateUser(u.id, { firstName: e.target.value })} /></td>
+              <td><input value={u.lastName} onChange={(e) => updateUser(u.id, { lastName: e.target.value })} /></td>
+              <td><select value={u.role} onChange={(e) => updateUser(u.id, { role: e.target.value as Role })}>{roles.map((r) => <option key={r} value={r}>{r}</option>)}</select></td>
+              <td><button type="button" className="icon-btn danger" onClick={() => removeUser(u.id)}>Elimina</button></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
       <h3>Codici SAP / Modelli</h3>
       <form className="sap-form" onSubmit={addSap}>
@@ -75,6 +99,16 @@ export function SetupPage() {
         <tbody>
           {sapCatalog.map((item) => (
             <tr key={item.id}><td>{item.sapCode}</td><td>{item.modelName}</td><td>{item.provider}</td><td><button type="button" className="icon-btn danger" onClick={() => removeSap(item.id)}>Rimuovi</button></td></tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h3>Modem installati</h3>
+      <table className="compact-table with-separators">
+        <thead><tr><th>Seriale</th><th>Modello</th><th>SAP</th><th>Tecnico</th></tr></thead>
+        <tbody>
+          {installedModems.map((row) => (
+            <tr key={row.id}><td>{row.serial}</td><td>{row.model}</td><td>{row.sap}</td><td>{row.assignedTo}</td></tr>
           ))}
         </tbody>
       </table>

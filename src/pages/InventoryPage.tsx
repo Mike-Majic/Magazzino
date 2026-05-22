@@ -2,8 +2,12 @@ import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 're
 import { useSearchParams } from 'react-router-dom';
 import { defaultSapCatalog, initialInventoryRows, InventoryRow, InventoryStatus, MovementRow, SapItem, seededUsers, UserRow } from '../data';
 
+type SortDirection = 'asc' | 'desc';
+type SortableField = 'serial' | 'model' | 'sap' | 'status' | 'assignedTo' | 'notes';
+
 const initialWidths = [170, 150, 90, 105, 130, 180, 120, 70];
 const statuses: InventoryStatus[] = ['giacente', 'assegnato', 'installato', 'da_riconsegnare', 'riconsegnato', 'guasto', 'scaricato'];
+const visibleStatuses: InventoryStatus[] = ['giacente', 'assegnato'];
 const formatNow = () => {
   const now = new Date();
   return {
@@ -21,6 +25,8 @@ export function InventoryPage() {
   const [movements, setMovements] = useState<MovementRow[]>([]);
   const [users, setUsers] = useState<UserRow[]>(seededUsers);
   const [sapCatalog, setSapCatalog] = useState<SapItem[]>(defaultSapCatalog);
+  const [sortField, setSortField] = useState<SortableField>('serial');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   const [newRow, setNewRow] = useState<Omit<InventoryRow, 'id'>>({ serial: '', model: '', sap: '', status: 'giacente', assignedTo: '-', notes: '' });
 
@@ -41,12 +47,27 @@ export function InventoryPage() {
   const filteredRows = useMemo(() => {
     const keyword = search.trim().toLowerCase();
     return rows.filter((row) => {
+      if (!visibleStatuses.includes(row.status)) return false;
       const matchesStatus = statusFilter ? row.status === statusFilter : true;
       if (!matchesStatus) return false;
       if (!keyword) return true;
       return [row.serial, row.model, row.sap, row.status, row.assignedTo, row.notes, row.attachmentName ?? ''].join(' ').toLowerCase().includes(keyword);
     });
   }, [rows, search, statusFilter]);
+
+  const sortedRows = useMemo(() => {
+    const factor = sortDirection === 'asc' ? 1 : -1;
+    return [...filteredRows].sort((a, b) => a[sortField].localeCompare(b[sortField]) * factor);
+  }, [filteredRows, sortDirection, sortField]);
+
+  const setSorting = (field: SortableField) => {
+    if (field === sortField) {
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+      return;
+    }
+    setSortField(field);
+    setSortDirection('asc');
+  };
 
   const startResize = (index: number, startX: number) => {
     const startWidth = colWidths[index];
@@ -62,16 +83,9 @@ export function InventoryPage() {
   const logMovement = (row: InventoryRow, action: string) => {
     const { date, time } = formatNow();
     const entry: MovementRow = {
-      id: Date.now() + Math.floor(Math.random() * 1000),
-      date,
-      time,
-      user: 'operatore',
-      serial: row.serial,
-      action,
-      technician: row.assignedTo,
-      notes: row.notes,
-      attachmentName: row.attachmentName,
-      attachmentUrl: row.attachmentUrl
+      id: Date.now() + Math.floor(Math.random() * 1000), date, time, user: 'operatore',
+      serial: row.serial, action, technician: row.assignedTo, notes: row.notes,
+      attachmentName: row.attachmentName, attachmentUrl: row.attachmentUrl
     };
     setMovements((prev) => {
       const next = [entry, ...prev];
@@ -123,9 +137,20 @@ export function InventoryPage() {
     event.target.value = '';
   };
 
+  const headers: Array<{ label: string; field?: SortableField }> = [
+    { label: 'Seriale', field: 'serial' },
+    { label: 'Modello', field: 'model' },
+    { label: 'SAP', field: 'sap' },
+    { label: 'Stato', field: 'status' },
+    { label: 'Assegnato a', field: 'assignedTo' },
+    { label: 'Note', field: 'notes' },
+    { label: 'Allegato' },
+    { label: 'Azioni' }
+  ];
+
   return (
     <section>
-      <h2>Seriali modem</h2>
+      <h2>Seriali modem (solo da assegnare e assegnati)</h2>
       <form className="new-modem-form" onSubmit={registerModem}>
         <input value={newRow.serial} onChange={(e) => setNewRow({ ...newRow, serial: e.target.value })} placeholder="Seriale" />
         <input value={newRow.model} onChange={(e) => setNewRow({ ...newRow, model: e.target.value })} placeholder="Descrizione modem" />
@@ -145,18 +170,20 @@ export function InventoryPage() {
           <colgroup>{colWidths.map((w, i) => <col key={i} style={{ width: `${w}px` }} />)}</colgroup>
           <thead>
             <tr>
-              {['Seriale', 'Modello', 'SAP', 'Stato', 'Assegnato a', 'Note', 'Allegato', 'Azioni'].map((header, index) => (
-                <th key={header}><span>{header}</span><span className="resize-handle" onMouseDown={(e) => startResize(index, e.clientX)} /></th>
+              {headers.map((header, index) => (
+                <th key={header.label}>
+                  <button type="button" className="th-sort-btn" onClick={() => header.field && setSorting(header.field)}>
+                    {header.label}{header.field === sortField ? (sortDirection === 'asc' ? ' ▲' : ' ▼') : ''}
+                  </button>
+                  <span className="resize-handle" onMouseDown={(e) => startResize(index, e.clientX)} />
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {filteredRows.map((row) => (
+            {sortedRows.map((row) => (
               <tr key={row.id}>
-                <td>{row.serial}</td>
-                <td>{row.model}</td>
-                <td>{row.sap}</td>
-                <td>{row.status}</td>
+                <td>{row.serial}</td><td>{row.model}</td><td>{row.sap}</td><td>{row.status}</td>
                 <td><select value={row.assignedTo} onChange={(e) => updateRow(row.id, { assignedTo: e.target.value }, 'Cambio tecnico assegnato')}><option value="-">-</option>{userNames.map((name) => <option key={name} value={name}>{name}</option>)}</select></td>
                 <td><input value={row.notes} onChange={(e) => updateRow(row.id, { notes: e.target.value }, 'Aggiornamento note')} /></td>
                 <td className="attachment-cell">
