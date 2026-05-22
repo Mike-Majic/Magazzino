@@ -10,10 +10,10 @@ import { SetupPage } from './pages/SetupPage';
 const navItems = [
   { to: '/', label: 'Dashboard' },
   { to: '/inventory', label: 'Magazzino' },
-  { to: '/movements', label: 'Movimenti' },
   { to: '/installed', label: 'Materiali installati' },
   { to: '/to-return', label: 'Materiali da riconsegnare' },
   { to: '/reported', label: 'Materiali denunciati' },
+  { to: '/movements', label: 'Movimenti' },
   { to: '/setup', label: 'Setup' }
 ];
 

@@ -45,7 +45,7 @@ export function DashboardPage() {
       <div className="grid-cards modern-grid">
         {cards.map((card) => (
           <button key={card.status} className="card card-button modern-card" onClick={() => navigate(statusRoutes[card.status])}>
-            <small>{card.title}</small><span>{card.value}</span><em>Apri elenco</em>
+            <small className="card-title">{card.title}</small><span>{card.value}</span>
           </button>
         ))}
       </div>
