@@ -34,11 +34,17 @@ export function SetupPage() {
   };
 
   const updateUser = (id: number, patch: Partial<UserRow>) => {
+    const current = users.find((u) => u.id === id);
+    if (!current || current.locked) return;
     const next = users.map((u) => (u.id === id ? { ...u, ...patch } : u));
     persistUsers(next);
   };
 
-  const removeUser = (id: number) => persistUsers(users.filter((u) => u.id !== id));
+  const removeUser = (id: number) => {
+    const current = users.find((u) => u.id === id);
+    if (!current || current.locked) return;
+    persistUsers(users.filter((u) => u.id !== id));
+  };
 
   const addSap = (event: FormEvent) => {
     event.preventDefault();
@@ -77,10 +83,10 @@ export function SetupPage() {
         <tbody>
           {users.map((u) => (
             <tr key={u.id}>
-              <td><input value={u.firstName} onChange={(e) => updateUser(u.id, { firstName: e.target.value })} /></td>
-              <td><input value={u.lastName} onChange={(e) => updateUser(u.id, { lastName: e.target.value })} /></td>
-              <td><select value={u.role} onChange={(e) => updateUser(u.id, { role: e.target.value as Role })}>{roles.map((r) => <option key={r} value={r}>{r}</option>)}</select></td>
-              <td><button type="button" className="icon-btn danger" onClick={() => removeUser(u.id)}>Elimina</button></td>
+              <td><input value={u.firstName} disabled={u.locked} onChange={(e) => updateUser(u.id, { firstName: e.target.value })} /></td>
+              <td><input value={u.lastName} disabled={u.locked} onChange={(e) => updateUser(u.id, { lastName: e.target.value })} /></td>
+              <td><select value={u.role} disabled={u.locked} onChange={(e) => updateUser(u.id, { role: e.target.value as Role })}>{roles.map((r) => <option key={r} value={r}>{r}</option>)}</select></td>
+              <td>{u.locked ? <span className="locked-badge">Protetto</span> : <button type="button" className="icon-btn danger" onClick={() => removeUser(u.id)}>Elimina</button>}</td>
             </tr>
           ))}
         </tbody>

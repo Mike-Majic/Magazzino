@@ -40,3 +40,5 @@ h3 { margin: .8rem 0 .4rem; font-size: 1rem; }
   .layout { grid-template-columns: 1fr; }
   .new-modem-form, .users-form, .sap-form { grid-template-columns: 1fr 1fr; }
 }
+
+.locked-badge { font-size: .72rem; padding: .2rem .35rem; border-radius: .3rem; background: #fee2e2; color: #991b1b; font-weight: 600; }
