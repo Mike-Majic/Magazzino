@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { defaultSapCatalog, initialInventoryRows, Role, SapItem, seededUsers, UserRow } from '../data';
+import { defaultSapCatalog, Role, SapItem, seededUsers, UserRow } from '../data';
 
 const roles: Role[] = ['Admin', 'Magazzino', 'Tecnico', 'Sola lettura'];
 
@@ -55,7 +55,6 @@ export function SetupPage() {
     localStorage.setItem('sap_catalog', JSON.stringify(next));
   };
 
-  const installedModems = initialInventoryRows.filter((row) => row.status === 'installato');
 
   return (
     <section>
@@ -103,15 +102,6 @@ export function SetupPage() {
         </tbody>
       </table>
 
-      <h3>Modem installati</h3>
-      <table className="compact-table with-separators">
-        <thead><tr><th>Seriale</th><th>Modello</th><th>SAP</th><th>Tecnico</th></tr></thead>
-        <tbody>
-          {installedModems.map((row) => (
-            <tr key={row.id}><td>{row.serial}</td><td>{row.model}</td><td>{row.sap}</td><td>{row.assignedTo}</td></tr>
-          ))}
-        </tbody>
-      </table>
     </section>
   );
 }

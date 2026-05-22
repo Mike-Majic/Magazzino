@@ -2,12 +2,14 @@ import { NavLink, Route, Routes } from 'react-router-dom';
 import { DashboardPage } from './pages/DashboardPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { MovementsPage } from './pages/MovementsPage';
+import { InstalledModemsPage } from './pages/InstalledModemsPage';
 import { SetupPage } from './pages/SetupPage';
 
 const navItems = [
   { to: '/', label: 'Dashboard' },
   { to: '/inventory', label: 'Magazzino' },
   { to: '/movements', label: 'Movimenti' },
+  { to: '/installed', label: 'Modem installati' },
   { to: '/setup', label: 'Setup' }
 ];
 
@@ -29,6 +31,7 @@ export function App() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/movements" element={<MovementsPage />} />
+          <Route path="/installed" element={<InstalledModemsPage />} />
           <Route path="/setup" element={<SetupPage />} />
         </Routes>
       </main>
