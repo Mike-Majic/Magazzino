@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { initialInventoryRows, InventoryRow, InventoryStatus } from '../data';
 
 const labels: Record<InventoryStatus, string> = { da_assegnare: 'Da assegnare', assegnato: 'Assegnato', installato: 'Installato', da_riconsegnare: 'Da riconsegnare', riconsegnato: 'Riconsegnato', denunciato: 'Denunciato' };
@@ -6,6 +7,8 @@ const statuses: InventoryStatus[] = ['da_assegnare', 'assegnato', 'installato', 
 
 export function ToReturnModemsPage() {
   const [rows, setRows] = useState<InventoryRow[]>(initialInventoryRows);
+  const [searchParams] = useSearchParams();
+  const statusParam = searchParams.get('status');
   const [search, setSearch] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -23,7 +26,7 @@ export function ToReturnModemsPage() {
   const filtered = useMemo(
     () =>
       rows
-        .filter((r) => r.status === 'da_riconsegnare')
+        .filter((r) => statusParam === 'riconsegnato' ? r.status === 'riconsegnato' : r.status === 'da_riconsegnare')
         .filter(
           (r) =>
             (!search || [r.serial, r.model, r.sap, r.assignedTo, r.notes].join(' ').toLowerCase().includes(search.toLowerCase())) &&
@@ -39,13 +42,13 @@ export function ToReturnModemsPage() {
       filtered.map((r) => `${r.serial},${r.model},${r.sap},${labels[r.status]},${r.assignedTo},${r.notes},${r.createdAt}`).join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-    a.download = 'da_riconsegnare.csv';
+    a.download = statusParam === 'riconsegnato' ? 'riconsegnati.csv' : 'da_riconsegnare.csv';
     a.click();
   };
 
   return (
     <section>
-      <h2>Materiali da riconsegnare</h2>
+      <h2>{statusParam === 'riconsegnato' ? 'Materiali riconsegnati' : 'Materiali da riconsegnare'}</h2>
       <div className="filters-row modern-filters">
         <input className="search-input" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Filtro seriale/modello..." />
         <input type="date" className="modern-input" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
