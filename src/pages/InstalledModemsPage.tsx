@@ -45,12 +45,12 @@ export function InstalledModemsPage() {
 
   return (
     <section>
-      <h2>Modem installati</h2>
-      <div className="filters-row">
+      <h2>Materiali installati</h2>
+      <div className="filters-row modern-filters">
         <input className="search-input" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Filtro seriale/modello..." />
-        <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
-        <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
-        <button className="icon-btn" onClick={exp}>Export Excel/CSV</button>
+        <input type="date" className="modern-input" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+        <input type="date" className="modern-input" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+        <button className="modern-export-btn" onClick={exp}>Export Excel/CSV</button>
       </div>
       <table className="compact-table with-separators">
         <thead>

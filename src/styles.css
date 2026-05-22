@@ -44,3 +44,7 @@ h3 { margin: .8rem 0 .4rem; font-size: 1rem; }
 .locked-badge { font-size: .72rem; padding: .2rem .35rem; border-radius: .3rem; background: #fee2e2; color: #991b1b; font-weight: 600; }
 
 .filters-row { display:flex; gap:.35rem; align-items:center; margin:0 0 .5rem; flex-wrap:wrap; }
+
+.modern-filters { background: #eef4ff; border: 1px solid #c7d2fe; padding: .4rem; border-radius: .6rem; }
+.modern-input { border: 1px solid #93c5fd; border-radius: .5rem; padding: .35rem .45rem; background: #fff; }
+.modern-export-btn { border: 0; background: linear-gradient(135deg,#2563eb,#1d4ed8); color: #fff; border-radius: .55rem; padding: .4rem .7rem; cursor: pointer; font-weight: 600; }

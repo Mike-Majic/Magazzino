@@ -26,11 +26,12 @@ export function MovementsPage() {
   return (
     <section>
       <h2>Storico movimenti</h2>
-      <div className="filters-row">
+      <div className="filters-row modern-filters">
         <input className="search-input" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cerca in tutti i movimenti" />
-        <input type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} />
-        <input type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} />
-        <button type="button" className="icon-btn" onClick={() => { const csv = 'data,ora,utente,seriale,azione,tecnico,note\n' + filteredRows.map(r => `${r.date},${r.time},${r.user},${r.serial},${r.action},${r.technician},${r.notes}`).join('\n'); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='movimenti.csv'; a.click(); }}>Export Excel/CSV</button>
+        <input type="date" className="modern-input" value={fromDate} onChange={(event) => setFromDate(event.target.value)} />
+        <input type="date" className="modern-input" value={toDate} onChange={(event) => setToDate(event.target.value)} />
+        <button type="button" className="icon-btn" onClick={() => { const csv = 'data,ora,utente,seriale,azione,tecnico,note\n' + filteredRows.map(r => `${r.date},${r.time},${r.user},${r.serial},${r.action},${r.technician},${r.notes}`).join('\n'); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='movimenti.csv'; a.click(); }}>⬇ Export Excel/CSV</button>
+              <button type="button" className="icon-btn danger" title="Reset log" onClick={() => { if (window.confirm('Resettare tutti i movimenti?')) { setRows([]); localStorage.removeItem('movements_log'); } }}>🧹 Reset log</button>
       </div>
       <table className="compact-table with-separators">
         <thead>
