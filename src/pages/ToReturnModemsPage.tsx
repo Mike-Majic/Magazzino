@@ -4,7 +4,7 @@ import { initialInventoryRows, InventoryRow, InventoryStatus } from '../data';
 const labels: Record<InventoryStatus, string> = { da_assegnare: 'Da assegnare', assegnato: 'Assegnato', installato: 'Installato', da_riconsegnare: 'Da riconsegnare', denunciato: 'Denunciato' };
 const statuses: InventoryStatus[] = ['da_assegnare', 'assegnato', 'installato', 'da_riconsegnare', 'denunciato'];
 
-export function InstalledModemsPage() {
+export function ToReturnModemsPage() {
   const [rows, setRows] = useState<InventoryRow[]>(initialInventoryRows);
   const [search, setSearch] = useState('');
   const [fromDate, setFromDate] = useState('');
@@ -23,7 +23,7 @@ export function InstalledModemsPage() {
   const filtered = useMemo(
     () =>
       rows
-        .filter((r) => r.status === 'installato')
+        .filter((r) => r.status === 'da_riconsegnare')
         .filter(
           (r) =>
             (!search || [r.serial, r.model, r.sap, r.assignedTo, r.notes].join(' ').toLowerCase().includes(search.toLowerCase())) &&
@@ -39,13 +39,13 @@ export function InstalledModemsPage() {
       filtered.map((r) => `${r.serial},${r.model},${r.sap},${labels[r.status]},${r.assignedTo},${r.notes},${r.createdAt}`).join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-    a.download = 'installati.csv';
+    a.download = 'da_riconsegnare.csv';
     a.click();
   };
 
   return (
     <section>
-      <h2>Modem installati</h2>
+      <h2>Modem da riconsegnare</h2>
       <div className="filters-row">
         <input className="search-input" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Filtro seriale/modello..." />
         <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />

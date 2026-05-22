@@ -3,6 +3,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { MovementsPage } from './pages/MovementsPage';
 import { InstalledModemsPage } from './pages/InstalledModemsPage';
+import { ToReturnModemsPage } from './pages/ToReturnModemsPage';
 import { SetupPage } from './pages/SetupPage';
 
 const navItems = [
@@ -10,6 +11,7 @@ const navItems = [
   { to: '/inventory', label: 'Magazzino' },
   { to: '/movements', label: 'Movimenti' },
   { to: '/installed', label: 'Modem installati' },
+  { to: '/to-return', label: 'Modem da riconsegnare' },
   { to: '/setup', label: 'Setup' }
 ];
 
@@ -32,6 +34,7 @@ export function App() {
           <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/movements" element={<MovementsPage />} />
           <Route path="/installed" element={<InstalledModemsPage />} />
+          <Route path="/to-return" element={<ToReturnModemsPage />} />
           <Route path="/setup" element={<SetupPage />} />
         </Routes>
       </main>
