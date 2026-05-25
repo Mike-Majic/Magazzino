@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { MovementRow } from '../data';
+import { buildCsv, downloadCsv } from '../utils/csv';
+
 
 export function MovementsPage() {
   const [search, setSearch] = useState('');
@@ -30,10 +32,10 @@ export function MovementsPage() {
         <input className="search-input" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cerca in tutti i movimenti" />
         <input type="date" className="modern-input" value={fromDate} onChange={(event) => setFromDate(event.target.value)} />
         <input type="date" className="modern-input" value={toDate} onChange={(event) => setToDate(event.target.value)} />
-        <button type="button" className="modern-export-btn" onClick={() => { const csv = 'data,ora,utente,seriale,sap,stato,provenienza,azione,tecnico,note\n' + filteredRows.map(r => `${r.date},${r.time},${r.user},${r.serial},${r.sap},${r.status},${r.provenance},${r.action},${r.technician},${r.notes}`).join('\n'); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='movimenti.csv'; a.click(); }}>Export Excel/CSV</button>
+        <button type="button" className="modern-export-btn" onClick={() => { const csv = buildCsv(['data','ora','utente','seriale','sap','stato','provenienza','azione','tecnico','note'], filteredRows.map(r => [r.date, r.time, r.user, r.serial, r.sap, r.status, r.provenance, r.action, r.technician, r.notes])); downloadCsv(csv, 'movimenti.csv'); }}>Export Excel/CSV</button>
               <button type="button" className="icon-btn danger" title="Reset log" onClick={() => { if (window.confirm('Resettare tutti i movimenti?')) { setRows([]); localStorage.removeItem('movements_log'); } }}>🧹 Reset log</button>
       </div>
-      <table className="compact-table with-separators">
+      <div className="table-wrap"><table className="compact-table with-separators movements-wide-table">
         <thead>
           <tr><th>Data</th><th>Ora</th><th>Utente</th><th>Seriale</th><th>SAP</th><th>Stato</th><th>Provenienza</th><th>Azione</th><th>Tecnico</th><th>Note</th><th>Allegato</th></tr>
         </thead>
@@ -45,7 +47,7 @@ export function MovementsPage() {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
     </section>
   );
 }
