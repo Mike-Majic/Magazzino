@@ -52,7 +52,7 @@ export type MovementRow = {
 };
 
 export const seededUsers: UserRow[] = [
-  { id: 1, firstName: 'Michael', lastName: 'Colurci', role: 'Admin', jobRole: 'Admin', locked: true, email: 'm.colurci@gmail.com', password: 'admin123' },
+  { id: 1, firstName: 'Michael', lastName: 'Colurci', role: 'Admin', jobRole: 'Admin', locked: false, email: 'm.colurci@gmail.com', password: 'admin123' },
   { id: 2, firstName: 'Simone', lastName: "D'Alessandro", role: 'Tecnico', jobRole: 'Tecnico', email: 'simone@fibertech.it', password: 'test1234' }
 ];
 
