@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { initialInventoryRows, InventoryRow, InventoryStatus } from '../data';
+import { loadTable } from '../lib/repo';
 
 const statusLabels: Record<InventoryStatus, string> = {
   da_assegnare: 'Da assegnare',
@@ -24,10 +25,7 @@ export function DashboardPage() {
   const navigate = useNavigate();
   const [rows, setRows] = useState<InventoryRow[]>(initialInventoryRows);
 
-  useEffect(() => {
-    const stored = localStorage.getItem('inventory_rows');
-    if (stored) setRows(JSON.parse(stored));
-  }, []);
+  useEffect(() => { (async () => { setRows(await loadTable('inventory_rows','inventory_rows',initialInventoryRows)); })(); }, []);
 
   const cards = useMemo(
     () =>
