@@ -1,5 +1,6 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { buildCsv, downloadCsv } from '../utils/csv';
+import { loadTable, saveTable } from '../lib/repo';
 import { defaultSapCatalog, initialInventoryRows, InventoryRow, InventoryStatus, MovementRow, SapItem, seededCompanies, seededUsers, UserRow } from '../data';
 
 const statuses: InventoryStatus[] = ['da_assegnare', 'assegnato', 'installato', 'da_riconsegnare', 'riconsegnato', 'denunciato'];
@@ -24,12 +25,17 @@ export function InventoryPage() {
   const [scannerOpen, setScannerOpen] = useState(false);
 
   useEffect(() => {
-    const inv = localStorage.getItem('inventory_rows'); const usr = localStorage.getItem('users_registry'); const sap = localStorage.getItem('sap_catalog'); const mov = localStorage.getItem('movements_log'); const cmp = localStorage.getItem('companies_registry');
-    if (inv) setRows(JSON.parse(inv)); if (usr) setUsers(JSON.parse(usr)); if (sap) setSapCatalog(JSON.parse(sap)); if (mov) setMovements(JSON.parse(mov)); if (cmp) setCompanies(JSON.parse(cmp));
+    (async () => {
+      setRows(await loadTable('inventory_rows','inventory_rows',initialInventoryRows));
+      setUsers(await loadTable('users_registry','users_registry',seededUsers));
+      setSapCatalog(await loadTable('sap_catalog','sap_catalog',defaultSapCatalog));
+      setMovements(await loadTable('movements_log','movements_log',[]));
+      setCompanies(await loadTable('companies_registry','companies_registry',seededCompanies));
+    })();
   }, []);
 
-  const persistRows = (next: InventoryRow[]) => { setRows(next); localStorage.setItem('inventory_rows', JSON.stringify(next)); };
-  const logMovement = (row: InventoryRow, action: string) => { const d = new Date(); const entry: MovementRow = { id: Date.now(), date: d.toLocaleDateString('it-IT'), time: d.toLocaleTimeString('it-IT'), user: 'operatore', serial: row.serial, sap: row.sap, status: row.status, provenance: row.provenance, action, technician: row.assignedTo, notes: row.notes, attachmentName: row.attachmentName, attachmentUrl: row.attachmentUrl }; const next = [entry, ...movements]; setMovements(next); localStorage.setItem('movements_log', JSON.stringify(next)); };
+  const persistRows = (next: InventoryRow[]) => { setRows(next); void saveTable('inventory_rows','inventory_rows', next); };
+  const logMovement = (row: InventoryRow, action: string) => { const d = new Date(); const entry: MovementRow = { id: Date.now(), date: d.toLocaleDateString('it-IT'), time: d.toLocaleTimeString('it-IT'), user: 'operatore', serial: row.serial, sap: row.sap, status: row.status, provenance: row.provenance, action, technician: row.assignedTo, notes: row.notes, attachmentName: row.attachmentName, attachmentUrl: row.attachmentUrl }; const next = [entry, ...movements]; setMovements(next); void saveTable('movements_log','movements_log', next); };
 
   const visible = useMemo(() => rows.filter(r => ['da_assegnare', 'assegnato'].includes(r.status)).filter(r => (!search || [r.serial, r.model, r.sap, r.notes, r.assignedTo, r.provenance, labels[r.status]].join(' ').toLowerCase().includes(search.toLowerCase())) && (!fromDate || r.createdAt >= fromDate) && (!toDate || r.createdAt <= toDate)), [rows, search, fromDate, toDate]);
 

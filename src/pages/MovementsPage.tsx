@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { MovementRow } from '../data';
 import { buildCsv, downloadCsv } from '../utils/csv';
+import { loadTable, saveTable } from '../lib/repo';
 
 
 export function MovementsPage() {
@@ -9,10 +10,7 @@ export function MovementsPage() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
 
-  useEffect(() => {
-    const stored = localStorage.getItem('movements_log');
-    if (stored) setRows(JSON.parse(stored));
-  }, []);
+  useEffect(() => { (async () => { setRows(await loadTable('movements_log','movements_log',[])); })(); }, []);
 
   const filteredRows = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -33,7 +31,7 @@ export function MovementsPage() {
         <input type="date" className="modern-input" value={fromDate} onChange={(event) => setFromDate(event.target.value)} />
         <input type="date" className="modern-input" value={toDate} onChange={(event) => setToDate(event.target.value)} />
         <button type="button" className="modern-export-btn" onClick={() => { const csv = buildCsv(['data','ora','utente','seriale','sap','stato','provenienza','azione','tecnico','note'], filteredRows.map(r => [r.date, r.time, r.user, r.serial, r.sap, r.status, r.provenance, r.action, r.technician, r.notes])); downloadCsv(csv, 'movimenti.csv'); }}>Export Excel/CSV</button>
-              <button type="button" className="icon-btn danger" title="Reset log" onClick={() => { if (window.confirm('Resettare tutti i movimenti?')) { setRows([]); localStorage.removeItem('movements_log'); } }}>🧹 Reset log</button>
+              <button type="button" className="icon-btn danger" title="Reset log" onClick={() => { if (window.confirm('Resettare tutti i movimenti?')) { setRows([]); void saveTable('movements_log','movements_log', []); } }}>🧹 Reset log</button>
       </div>
       <div className="table-wrap"><table className="compact-table with-separators movements-wide-table">
         <thead>

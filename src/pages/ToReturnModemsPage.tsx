@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { initialInventoryRows, InventoryRow, InventoryStatus } from '../data';
 import { buildCsv, downloadCsv } from '../utils/csv';
+import { loadTable, saveTable } from '../lib/repo';
 
 
 const labels: Record<InventoryStatus, string> = { da_assegnare: 'Da assegnare', assegnato: 'Assegnato', installato: 'Installato', da_riconsegnare: 'Da riconsegnare', riconsegnato: 'Riconsegnato', denunciato: 'Denunciato' };
@@ -15,14 +16,11 @@ export function ToReturnModemsPage() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
 
-  useEffect(() => {
-    const inv = localStorage.getItem('inventory_rows');
-    if (inv) setRows(JSON.parse(inv));
-  }, []);
+  useEffect(() => { (async () => { setRows(await loadTable('inventory_rows','inventory_rows',initialInventoryRows)); })(); }, []);
 
   const persist = (next: InventoryRow[]) => {
     setRows(next);
-    localStorage.setItem('inventory_rows', JSON.stringify(next));
+    void saveTable('inventory_rows','inventory_rows', next);
   };
 
   const filtered = useMemo(
