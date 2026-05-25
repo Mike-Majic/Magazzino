@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { initialInventoryRows, InventoryRow, InventoryStatus } from '../data';
+import { buildCsv, downloadCsv } from '../utils/csv';
 
 const labels: Record<InventoryStatus, string> = { da_assegnare: 'Da assegnare', assegnato: 'Assegnato', installato: 'Installato', da_riconsegnare: 'Da riconsegnare', riconsegnato: 'Riconsegnato', denunciato: 'Denunciato' };
 const statuses: InventoryStatus[] = ['da_assegnare', 'assegnato', 'installato', 'da_riconsegnare', 'riconsegnato', 'denunciato'];
@@ -34,13 +35,8 @@ export function InstalledModemsPage() {
   );
 
   const exp = () => {
-    const csv =
-      'seriale,modello,sap,stato,tecnico,provenienza,note,data\n' +
-      filtered.map((r) => `${r.serial},${r.model},${r.sap},${labels[r.status]},${r.assignedTo},${r.provenance},${r.notes},${r.createdAt}`).join('\n');
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-    a.download = 'installati.csv';
-    a.click();
+    const csv = buildCsv(['seriale','modello','sap','stato','tecnico','provenienza','note','data'], filtered.map((r) => [r.serial, r.model, r.sap, labels[r.status], r.assignedTo, r.provenance, r.notes, r.createdAt]));
+    downloadCsv(csv, 'installati.csv');
   };
 
   return (
@@ -52,7 +48,7 @@ export function InstalledModemsPage() {
         <input type="date" className="modern-input" value={toDate} onChange={(e) => setToDate(e.target.value)} />
         <button className="modern-export-btn" onClick={exp}>Export Excel/CSV</button>
       </div>
-      <table className="compact-table with-separators">
+      <div className="table-wrap"><table className="compact-table with-separators data-wide-table">
         <thead>
           <tr><th>Seriale</th><th>Modello</th><th>SAP</th><th>Stato</th><th>Tecnico</th><th>Note</th></tr>
         </thead>
@@ -69,7 +65,7 @@ export function InstalledModemsPage() {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
     </section>
   );
 }
