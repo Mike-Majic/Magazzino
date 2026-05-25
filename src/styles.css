@@ -86,3 +86,14 @@ h3 { margin: .8rem 0 .4rem; font-size: 1rem; }
   .data-wide-table { min-width: 1100px; }
   .movements-wide-table { min-width: 1500px; }
 }
+
+.brand { background: #fff; border-radius: .8rem; padding: .2rem .45rem; box-shadow: 0 6px 24px rgba(15,23,42,.14); margin-bottom: .55rem; }
+.brand svg { width: 100%; height: auto; display:block; }
+.brand-compact { background: rgba(255,255,255,.95); }
+.login-page { min-height: 100vh; display:grid; place-items:center; background: radial-gradient(circle at 15% 10%, #1e3a8a 0%, #0f172a 45%, #020617 100%); }
+.login-card { width: min(92vw, 560px); background:#ffffff; border-radius:1rem; padding:1rem; box-shadow:0 20px 45px rgba(2,6,23,.35); display:grid; gap:.6rem; }
+.login-form { display:grid; gap:.45rem; }
+.login-form input { padding:.5rem .6rem; border:1px solid #cbd5e1; border-radius:.5rem; }
+.top-userbar { display:flex; justify-content:flex-end; gap:.5rem; align-items:center; margin-bottom:.5rem; color:#334155; font-weight:600; }
+.users-auth-form { grid-template-columns: 1fr 1fr 1.2fr .9fr 1fr auto; }
+@media (max-width: 900px) { .users-auth-form { grid-template-columns: 1fr 1fr; } }
