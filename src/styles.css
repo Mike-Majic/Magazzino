@@ -39,6 +39,10 @@ th .resize-handle:hover { background: #93c5fd; }
 h3 { margin: .8rem 0 .4rem; font-size: 1rem; }
 @media (max-width: 900px) {
   .layout { grid-template-columns: 1fr; }
+  .sidebar { padding: .65rem; }
+  .sidebar h1 { margin-bottom: .55rem; }
+  .sidebar nav { gap: .2rem; }
+  .sidebar a { display: block; padding: .32rem .45rem; font-size: .84rem; line-height: 1.2; }
   .new-modem-form, .users-form, .sap-form { grid-template-columns: 1fr 1fr; }
 }
 
