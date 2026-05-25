@@ -8,6 +8,8 @@ export type UserRow = {
   role: Role;
   jobRole?: JobRole;
   locked?: boolean;
+  email?: string;
+  password?: string;
 };
 
 export type SapItem = { id: number; sapCode: string; modelName: string; provider: string };
@@ -27,6 +29,8 @@ export type InventoryRow = {
   createdAt: string;
   attachmentName?: string;
   attachmentUrl?: string;
+  attachmentNames?: string[];
+  attachmentUrls?: string[];
 };
 
 export type MovementRow = {
@@ -43,11 +47,13 @@ export type MovementRow = {
   notes: string;
   attachmentName?: string;
   attachmentUrl?: string;
+  attachmentNames?: string[];
+  attachmentUrls?: string[];
 };
 
 export const seededUsers: UserRow[] = [
-  { id: 1, firstName: 'Michael', lastName: 'Colurci', role: 'Admin', jobRole: 'Admin', locked: true },
-  { id: 2, firstName: 'Simone', lastName: "D'Alessandro", role: 'Tecnico', jobRole: 'Tecnico' }
+  { id: 1, firstName: 'Michael', lastName: 'Colurci', role: 'Admin', jobRole: 'Admin', locked: true, email: 'm.colurci@gmail.com', password: 'admin123' },
+  { id: 2, firstName: 'Simone', lastName: "D'Alessandro", role: 'Tecnico', jobRole: 'Tecnico', email: 'simone@fibertech.it', password: 'test1234' }
 ];
 
 export const seededCompanies: CompanyItem[] = [
