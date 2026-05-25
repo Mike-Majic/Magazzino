@@ -113,8 +113,6 @@ h3 { margin: .8rem 0 .4rem; font-size: 1rem; }
 .top-userbar .brand-compact { width: 138px; margin: 0 auto 0 0; padding: .12rem .28rem; }
 .sidebar .brand-compact { margin-bottom:.35rem; }
 
-.app-banner { height: 56px; display:flex; align-items:center; justify-content:center; font-weight:800; letter-spacing:1px; color:#fff; background: linear-gradient(90deg,#f97316 0%,#ec4899 40%,#38bdf8 70%,#22c55e 100%); }
-
 .login-shell { min-height: 100vh; display:flex; flex-direction:column; }
 .login-page { flex:1; min-height: 0; display:grid; place-items:center; background: radial-gradient(circle at 15% 10%, #1e3a8a 0%, #0f172a 45%, #020617 100%); }
 .app-banner { width: 100%; min-height: 56px; display:flex; align-items:center; justify-content:center; font-weight:800; letter-spacing:1px; color:#fff; background: linear-gradient(90deg,#f97316 0%,#ec4899 40%,#38bdf8 70%,#22c55e 100%); }
@@ -124,3 +122,11 @@ h3 { margin: .8rem 0 .4rem; font-size: 1rem; }
 .sidebar .brand { max-width: 380px; }
 .sidebar .brand-image { max-height: 78px; width: 100%; object-fit: contain; }
 .top-userbar .brand-image { max-height: 40px; object-fit: contain; }
+
+
+.sidebar-top { background: #ffffff; border-radius: .6rem; padding: .2rem .25rem .25rem; margin-bottom: .45rem; }
+.sidebar-top .brand { background: #ffffff; box-shadow: none; margin-bottom: .2rem; border-radius: .5rem; }
+.user-inline { display:flex; justify-content:flex-end; align-items:center; gap:.4rem; color:#1f2937; font-weight:600; font-size:.85rem; }
+.sidebar-toggle { width: 100%; text-align:left; background: transparent; border: 0; color: #fff; font-size: 1.02rem; font-weight: 800; padding: .15rem .1rem .4rem; display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
+.top-userbar { display:none; }
+@media (max-width: 900px) { .sidebar-top { margin-bottom:.35rem; } .user-inline { font-size:.8rem; } }
