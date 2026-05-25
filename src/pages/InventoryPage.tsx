@@ -43,11 +43,6 @@ export function InventoryPage() {
   const persistRows = (next: InventoryRow[]) => { setRows(next); void saveTable('inventory_rows','inventory_rows', next); };
   const logMovement = (row: InventoryRow, action: string) => { const d = new Date(); const entry: MovementRow = { id: Date.now(), date: d.toLocaleDateString('it-IT'), time: d.toLocaleTimeString('it-IT'), user: 'operatore', serial: row.serial, sap: row.sap, status: row.status, provenance: row.provenance, action, technician: row.assignedTo, notes: row.notes, attachmentName: row.attachmentName, attachmentUrl: row.attachmentUrl }; const next = [entry, ...movements]; setMovements(next); void saveTable('movements_log','movements_log', next); };
 
-  const visible = useMemo(() => rows.filter(r => ['da_assegnare', 'assegnato'].includes(r.status)).filter(r => (!search || [r.serial, r.model, r.sap, r.notes, r.assignedTo, r.provenance, labels[r.status]].join(' ').toLowerCase().includes(search.toLowerCase())) && (!fromDate || r.createdAt >= fromDate) && (!toDate || r.createdAt <= toDate)), [rows, search, fromDate, toDate]);
-  const daAssegnare = useMemo(() => applySort(visible.filter(r => r.status === 'da_assegnare')), [visible, sortField, sortDir]);
-  const assegnati = useMemo(() => applySort(visible.filter(r => r.status === 'assegnato')), [visible, sortField, sortDir]);
-
-  const onBlurConfirm = (id: number, field: keyof InventoryRow, value: string) => { const curr = rows.find(r => r.id === id); if (!curr || String(curr[field]) === value) return; if (window.confirm('Applicare la modifica?')) { const updated = { ...curr, [field]: value }; const next = rows.map(r => r.id === id ? updated : r); persistRows(next); logMovement(updated, `Modifica ${String(field)}`); } };
   const applySort = (list: InventoryRow[]) => {
     if (!sortField) return list;
     return [...list].sort((a,b) => {
@@ -57,6 +52,12 @@ export function InventoryPage() {
       return sortDir === 'asc' ? cmp : -cmp;
     });
   };
+
+  const visible = useMemo(() => rows.filter(r => ['da_assegnare', 'assegnato'].includes(r.status)).filter(r => (!search || [r.serial, r.model, r.sap, r.notes, r.assignedTo, r.provenance, labels[r.status]].join(' ').toLowerCase().includes(search.toLowerCase())) && (!fromDate || r.createdAt >= fromDate) && (!toDate || r.createdAt <= toDate)), [rows, search, fromDate, toDate]);
+  const daAssegnare = useMemo(() => applySort(visible.filter(r => r.status === 'da_assegnare')), [visible, sortField, sortDir]);
+  const assegnati = useMemo(() => applySort(visible.filter(r => r.status === 'assegnato')), [visible, sortField, sortDir]);
+
+  const onBlurConfirm = (id: number, field: keyof InventoryRow, value: string) => { const curr = rows.find(r => r.id === id); if (!curr || String(curr[field]) === value) return; if (window.confirm('Applicare la modifica?')) { const updated = { ...curr, [field]: value }; const next = rows.map(r => r.id === id ? updated : r); persistRows(next); logMovement(updated, `Modifica ${String(field)}`); } };
   const onSort = (field: keyof InventoryRow) => {
     if (sortField === field) setSortDir((d) => d === 'asc' ? 'desc' : 'asc');
     else { setSortField(field); setSortDir('asc'); }
