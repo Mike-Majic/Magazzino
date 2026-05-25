@@ -65,3 +65,15 @@ h3 { margin: .8rem 0 .4rem; font-size: 1rem; }
 .scanner-box { width:min(92vw,420px); background:#0b1324; border:1px solid #1d4ed8; border-radius:.65rem; padding:.55rem; display:grid; gap:.5rem; }
 .scanner-box video { width:100%; border-radius:.45rem; background:#000; min-height:220px; object-fit:cover; }
 .scanner-box button { background:#1d4ed8; color:#fff; border:0; border-radius:.4rem; padding:.45rem .6rem; }
+
+
+.new-modem-form-titles { display:grid; grid-template-columns: 1.2fr 1fr .6fr .9fr .8fr 1.3fr auto; gap:.35rem; margin: .2rem 0 .2rem; }
+.new-modem-form-titles span { font-size:.74rem; font-weight:700; color:#334155; }
+.inventory-table { min-width: 1160px; }
+
+@media (max-width: 900px) {
+  .new-modem-form-titles { grid-template-columns: 1fr 1fr; }
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .inventory-table { min-width: 1280px; }
+  th, td { font-size: .8rem; padding: .32rem .4rem; }
+}
