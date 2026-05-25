@@ -48,7 +48,7 @@ export function InstalledModemsPage() {
         <input type="date" className="modern-input" value={toDate} onChange={(e) => setToDate(e.target.value)} />
         <button className="modern-export-btn" onClick={exp}>Export Excel/CSV</button>
       </div>
-      <table className="compact-table with-separators">
+      <div className="table-wrap"><table className="compact-table with-separators data-wide-table">
         <thead>
           <tr><th>Seriale</th><th>Modello</th><th>SAP</th><th>Stato</th><th>Tecnico</th><th>Note</th></tr>
         </thead>
@@ -65,7 +65,7 @@ export function InstalledModemsPage() {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
     </section>
   );
 }
