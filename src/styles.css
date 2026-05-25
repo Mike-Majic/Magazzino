@@ -67,8 +67,8 @@ h3 { margin: .8rem 0 .4rem; font-size: 1rem; }
 .scanner-box button { background:#1d4ed8; color:#fff; border:0; border-radius:.4rem; padding:.45rem .6rem; }
 
 
-.new-modem-form-titles { display:grid; grid-template-columns: 1.2fr 1fr .6fr .9fr .8fr 1.3fr auto; gap:.35rem; margin: .2rem 0 .2rem; }
-.new-modem-form-titles span { font-size:.74rem; font-weight:700; color:#334155; }
+.new-modem-form-titles { display:grid; grid-template-columns: 1.2fr 1fr .6fr .9fr .8fr 1.3fr 1fr auto; gap:.35rem; margin: .2rem 0 .2rem; }
+.new-modem-form-titles span { font-size:.74rem; font-weight:700; color:#334155; text-align:left; padding-left:.1rem; }
 .inventory-table { min-width: 1160px; }
 
 @media (max-width: 900px) {

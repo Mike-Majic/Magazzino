@@ -29,6 +29,8 @@ export type InventoryRow = {
   createdAt: string;
   attachmentName?: string;
   attachmentUrl?: string;
+  attachmentNames?: string[];
+  attachmentUrls?: string[];
 };
 
 export type MovementRow = {
@@ -45,6 +47,8 @@ export type MovementRow = {
   notes: string;
   attachmentName?: string;
   attachmentUrl?: string;
+  attachmentNames?: string[];
+  attachmentUrls?: string[];
 };
 
 export const seededUsers: UserRow[] = [
