@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { initialInventoryRows, InventoryRow, InventoryStatus } from '../data';
+import { buildCsv, downloadCsv } from '../utils/csv';
+import { loadTable, saveTable } from '../lib/repo';
+
 
 const labels: Record<InventoryStatus, string> = { da_assegnare: 'Da assegnare', assegnato: 'Assegnato', installato: 'Installato', da_riconsegnare: 'Da riconsegnare', riconsegnato: 'Riconsegnato', denunciato: 'Denunciato' };
 const statuses: InventoryStatus[] = ['da_assegnare', 'assegnato', 'installato', 'da_riconsegnare', 'riconsegnato', 'denunciato'];
@@ -13,14 +16,11 @@ export function ToReturnModemsPage() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
 
-  useEffect(() => {
-    const inv = localStorage.getItem('inventory_rows');
-    if (inv) setRows(JSON.parse(inv));
-  }, []);
+  useEffect(() => { (async () => { setRows(await loadTable('inventory_rows','inventory_rows',initialInventoryRows)); })(); }, []);
 
   const persist = (next: InventoryRow[]) => {
     setRows(next);
-    localStorage.setItem('inventory_rows', JSON.stringify(next));
+    void saveTable('inventory_rows','inventory_rows', next);
   };
 
   const filtered = useMemo(
@@ -37,13 +37,8 @@ export function ToReturnModemsPage() {
   );
 
   const exp = () => {
-    const csv =
-      'seriale,modello,sap,stato,tecnico,provenienza,note,data\n' +
-      filtered.map((r) => `${r.serial},${r.model},${r.sap},${labels[r.status]},${r.assignedTo},${r.provenance},${r.notes},${r.createdAt}`).join('\n');
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-    a.download = statusParam === 'riconsegnato' ? 'riconsegnati.csv' : 'da_riconsegnare.csv';
-    a.click();
+    const csv = buildCsv(['seriale','modello','sap','stato','tecnico','provenienza','note','data'], filtered.map((r) => [r.serial, r.model, r.sap, labels[r.status], r.assignedTo, r.provenance, r.notes, r.createdAt]));
+    downloadCsv(csv, statusParam === 'riconsegnato' ? 'riconsegnati.csv' : 'da_riconsegnare.csv');
   };
 
   return (
@@ -55,7 +50,7 @@ export function ToReturnModemsPage() {
         <input type="date" className="modern-input" value={toDate} onChange={(e) => setToDate(e.target.value)} />
         <button className="modern-export-btn" onClick={exp}>Export Excel/CSV</button>
       </div>
-      <table className="compact-table with-separators">
+      <div className="table-wrap"><table className="compact-table with-separators data-wide-table">
         <thead>
           <tr><th>Seriale</th><th>Modello</th><th>SAP</th><th>Stato</th><th>Tecnico</th><th>Note</th></tr>
         </thead>
@@ -72,7 +67,7 @@ export function ToReturnModemsPage() {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
     </section>
   );
 }
