@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { initialInventoryRows, InventoryRow, InventoryStatus } from '../data';
+import { buildCsv, downloadCsv } from '../utils/csv';
 
 const labels: Record<InventoryStatus, string> = { da_assegnare: 'Da assegnare', assegnato: 'Assegnato', installato: 'Installato', da_riconsegnare: 'Da riconsegnare', riconsegnato: 'Riconsegnato', denunciato: 'Denunciato' };
 const statuses: InventoryStatus[] = ['da_assegnare', 'assegnato', 'installato', 'da_riconsegnare', 'riconsegnato', 'denunciato'];
@@ -34,13 +35,8 @@ export function InstalledModemsPage() {
   );
 
   const exp = () => {
-    const csv =
-      'seriale,modello,sap,stato,tecnico,provenienza,note,data\n' +
-      filtered.map((r) => `${r.serial},${r.model},${r.sap},${labels[r.status]},${r.assignedTo},${r.provenance},${r.notes},${r.createdAt}`).join('\n');
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-    a.download = 'installati.csv';
-    a.click();
+    const csv = buildCsv(['seriale','modello','sap','stato','tecnico','provenienza','note','data'], filtered.map((r) => [r.serial, r.model, r.sap, labels[r.status], r.assignedTo, r.provenance, r.notes, r.createdAt]));
+    downloadCsv(csv, 'installati.csv');
   };
 
   return (
