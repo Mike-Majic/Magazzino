@@ -4,6 +4,7 @@ import { loadTable, saveTable } from '../lib/repo';
 
 const roles: JobRole[] = ['Tecnico', 'Assistente', 'Magazziniere', 'Admin'];
 const SUPERADMIN_EMAIL = 'm.colurci@gmail.com';
+const LEGACY_ADMIN_EMAIL = 'michael@fibertech.it';
 
 export function SetupPage() {
   const [users, setUsers] = useState<UserRow[]>(seededUsers);
@@ -19,7 +20,7 @@ export function SetupPage() {
   const [companies, setCompanies] = useState(seededCompanies);
   const [companyName, setCompanyName] = useState('');
 
-  useEffect(() => { (async () => { const loadedUsers = await loadTable('users_registry','users_registry',seededUsers); const hardened = loadedUsers.map((u) => (u.email?.toLowerCase() === SUPERADMIN_EMAIL ? { ...u, role: 'Admin' as const, jobRole: 'Admin' as const, locked: false } : u)); setUsers(hardened); if (JSON.stringify(hardened) !== JSON.stringify(loadedUsers)) void saveTable('users_registry','users_registry', hardened); setSapCatalog(await loadTable('sap_catalog','sap_catalog',defaultSapCatalog)); setCompanies(await loadTable('companies_registry','companies_registry',seededCompanies)); })(); }, []);
+  useEffect(() => { (async () => { const loadedUsers = await loadTable('users_registry','users_registry',seededUsers); const cleaned = loadedUsers.filter((u) => u.email?.toLowerCase() !== LEGACY_ADMIN_EMAIL); const hardened = cleaned.map((u) => (u.email?.toLowerCase() === SUPERADMIN_EMAIL ? { ...u, role: 'Admin' as const, jobRole: 'Admin' as const, locked: false } : u)); setUsers(hardened); if (JSON.stringify(hardened) !== JSON.stringify(loadedUsers)) void saveTable('users_registry','users_registry', hardened); setSapCatalog(await loadTable('sap_catalog','sap_catalog',defaultSapCatalog)); setCompanies(await loadTable('companies_registry','companies_registry',seededCompanies)); })(); }, []);
   const persistUsers=(next:UserRow[])=>{setUsers(next); void saveTable('users_registry','users_registry',next);};
   const addUser=(e:FormEvent)=>{e.preventDefault(); if(!firstName||!lastName||!email||!password) return; persistUsers([...users,{id:Date.now(),firstName,lastName,email,password,role: jobRole==='Admin'?'Admin':'Tecnico',jobRole,locked:false}]); setFirstName('');setLastName('');setEmail('');setPassword('');setJobRole('Tecnico');};
   const updateUser=(id:number,patch:Partial<UserRow>)=>{const c=users.find(u=>u.id===id); if(!c||c.locked||c.email?.toLowerCase()===SUPERADMIN_EMAIL) return; persistUsers(users.map(u=>u.id===id?{...u,...patch}:u));};
