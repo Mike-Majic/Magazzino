@@ -32,7 +32,15 @@ export async function loadTable<T extends { id: number }>(table: string, localKe
 
 export async function saveTable<T extends { id: number }>(table: string, localKey: string, rows: T[]) {
   localStorage.setItem(localKey, JSON.stringify(rows));
-  if (supabase) {
+  if (!supabase) return;
+
+  const ids = rows.map((r) => r.id);
+
+  if (ids.length > 0) {
+    await supabase.from(table).delete().not('id', 'in', `(${ids.join(',')})`);
     await supabase.from(table).upsert(rows);
+    return;
   }
+
+  await supabase.from(table).delete().gte('id', 0);
 }
