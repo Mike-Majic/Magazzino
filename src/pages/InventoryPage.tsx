@@ -7,15 +7,16 @@ const statuses: InventoryStatus[] = ['da_assegnare', 'assegnato', 'installato', 
 const labels: Record<InventoryStatus, string> = { da_assegnare: 'Da assegnare', assegnato: 'Assegnato', installato: 'Installato', da_riconsegnare: 'Da riconsegnare', riconsegnato: 'Riconsegnato', denunciato: 'Denunciato' };
 
 export function InventoryPage() {
-  const [rows, setRows] = useState<InventoryRow[]>(initialInventoryRows);
-  const [users, setUsers] = useState<UserRow[]>(seededUsers);
+  const [rows, setRows] = useState<InventoryRow[]>([]);
+  const [users, setUsers] = useState<UserRow[]>([]);
   const [companies, setCompanies] = useState(seededCompanies);
-  const [sapCatalog, setSapCatalog] = useState<SapItem[]>(defaultSapCatalog);
+  const [sapCatalog, setSapCatalog] = useState<SapItem[]>([]);
   const [search, setSearch] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [newRow, setNewRow] = useState<Omit<InventoryRow, 'id'>>({ serial: '', model: '', sap: '', status: 'da_assegnare', assignedTo: '-', provenance: 'SIELTE', notes: '', createdAt: new Date().toISOString().slice(0, 10) });
   const [movements, setMovements] = useState<MovementRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const attachmentPickerRef = useRef<HTMLInputElement>(null);
   const attachmentRowRef = useRef<number | null>(null);
   const serialInputRef = useRef<HTMLInputElement>(null);
@@ -37,6 +38,7 @@ export function InventoryPage() {
       setCompanies(await loadTable('companies_registry','companies_registry',seededCompanies));
       const sid = Number(localStorage.getItem('session_user_id') || 0);
       setCurrentUser(loadedUsers.find((u) => u.id === sid) ?? null);
+      setLoading(false);
     })();
   }, []);
 
@@ -117,6 +119,8 @@ export function InventoryPage() {
 
   const register = (e: FormEvent) => { e.preventDefault(); if (!newRow.serial) return; const row = { ...newRow, id: Date.now() }; const next = [row, ...rows]; persistRows(next); logMovement(row, 'Registrazione materiale'); setNewRow({ ...newRow, serial: '', model: '', sap: '', notes: '' }); };
   const onAttachmentChange = (event: ChangeEvent<HTMLInputElement>) => { const file = event.target.files?.[0]; const rowId = attachmentRowRef.current; if (!file || rowId === null) return; const fileUrl = URL.createObjectURL(file); const curr = rows.find(r => r.id === rowId); if (!curr) return; const names = [ ...(curr.attachmentNames ?? (curr.attachmentName ? [curr.attachmentName] : [])) ]; const urls = [ ...(curr.attachmentUrls ?? (curr.attachmentUrl ? [curr.attachmentUrl] : [])) ]; if (urls.length >= 3) { window.alert('Massimo 3 allegati per riga.'); event.target.value = ''; return; } names.push(file.name); urls.push(fileUrl); const updated = { ...curr, attachmentNames: names, attachmentUrls: urls, attachmentName: names[0], attachmentUrl: urls[0] }; const next = rows.map(r => r.id === rowId ? updated : r); persistRows(next); logMovement(updated, 'Aggiornamento allegato'); event.target.value = ''; };
+
+  if (loading) return <section><h2>Seriali materiali (da assegnare / assegnati)</h2><p>Caricamento dati...</p></section>;
 
   return <section><h2>Seriali materiali (da assegnare / assegnati)</h2>
     <div className='new-modem-form-titles'><span>Seriale</span><span>Descrizione materiale</span><span>SAP</span><span>Stato</span><span>Assegnato a</span><span>Provenienza</span><span>Note</span><span>Azione</span></div>
