@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { initialInventoryRows, InventoryRow, InventoryStatus } from '../data';
+import { initialInventoryRows, InventoryRow, InventoryStatus, seededUsers, UserRow } from '../data';
 import { buildCsv, downloadCsv } from '../utils/csv';
 import { loadTable, saveTable } from '../lib/repo';
 
@@ -15,25 +15,35 @@ export function ToReturnModemsPage() {
   const [search, setSearch] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
+  const [currentUser, setCurrentUser] = useState<UserRow | null>(null);
 
-  useEffect(() => { (async () => { setRows(await loadTable('inventory_rows','inventory_rows',initialInventoryRows)); })(); }, []);
+  useEffect(() => { (async () => {
+    setRows(await loadTable('inventory_rows','inventory_rows',initialInventoryRows));
+    const users = await loadTable('users_registry','users_registry',seededUsers);
+    const sid = Number(localStorage.getItem('session_user_id') || 0);
+    setCurrentUser(users.find((u) => u.id === sid) ?? null);
+  })(); }, []);
 
   const persist = (next: InventoryRow[]) => {
     setRows(next);
     void saveTable('inventory_rows','inventory_rows', next);
   };
 
+  const isTechnician = currentUser?.jobRole === 'Tecnico' || currentUser?.role === 'Tecnico';
+  const currentUserFullName = `${currentUser?.firstName ?? ''} ${currentUser?.lastName ?? ''}`.trim();
+
   const filtered = useMemo(
     () =>
       rows
         .filter((r) => statusParam === 'riconsegnato' ? r.status === 'riconsegnato' : r.status === 'da_riconsegnare')
+        .filter((r) => !isTechnician || (currentUserFullName && r.assignedTo === currentUserFullName))
         .filter(
           (r) =>
             (!search || [r.serial, r.model, r.sap, r.assignedTo, r.provenance, r.notes].join(' ').toLowerCase().includes(search.toLowerCase())) &&
             (!fromDate || r.createdAt >= fromDate) &&
             (!toDate || r.createdAt <= toDate)
         ),
-    [rows, search, fromDate, toDate]
+    [rows, search, fromDate, toDate, statusParam, isTechnician, currentUserFullName]
   );
 
   const exp = () => {

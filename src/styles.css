@@ -59,8 +59,10 @@ h3 { margin: .8rem 0 .4rem; font-size: 1rem; }
 .action-green { background: linear-gradient(135deg,#16a34a,#15803d) !important; color: #fff !important; border-color: #15803d !important; }
 
 
-.scan-prompt { display:flex; gap:.35rem; align-items:center; margin:-.1rem 0 .45rem; font-size:.8rem; }
-.scan-prompt button { border:1px solid #93c5fd; background:#fff; color:#1d4ed8; border-radius:.35rem; padding:.15rem .45rem; font-size:.78rem; }
+.scan-prompt { display:flex; gap:.35rem; align-items:center; margin:-.1rem 0 .45rem; font-size:10px; }
+.scan-prompt button { border:1px solid #93c5fd; border-radius:.35rem; padding:.15rem .45rem; font-size:12px; font-weight:700; }
+.scan-prompt-yes { background:#16a34a; color:#fff; border-color:#15803d !important; }
+.scan-prompt-no { background:#dc2626; color:#fff; border-color:#b91c1c !important; }
 .scanner-overlay { position:fixed; inset:0; background:rgba(2,6,23,.75); display:flex; align-items:center; justify-content:center; z-index:50; }
 .scanner-box { width:min(92vw,420px); background:#0b1324; border:1px solid #1d4ed8; border-radius:.65rem; padding:.55rem; display:grid; gap:.5rem; }
 .scanner-box video { width:100%; border-radius:.45rem; background:#000; min-height:220px; object-fit:cover; }
