@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { MovementRow } from '../data';
+import { MovementRow, seededUsers, UserRow } from '../data';
 import { buildCsv, downloadCsv } from '../utils/csv';
 import { loadTable, saveTable } from '../lib/repo';
 
@@ -9,8 +9,17 @@ export function MovementsPage() {
   const [rows, setRows] = useState<MovementRow[]>([]);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
+  const [currentUser, setCurrentUser] = useState<UserRow | null>(null);
 
-  useEffect(() => { (async () => { setRows(await loadTable('movements_log','movements_log',[])); })(); }, []);
+  useEffect(() => { (async () => {
+    setRows(await loadTable('movements_log','movements_log',[]));
+    const users = await loadTable('users_registry','users_registry',seededUsers);
+    const sid = Number(localStorage.getItem('session_user_id') || 0);
+    setCurrentUser(users.find((u) => u.id === sid) ?? null);
+  })(); }, []);
+
+  const isTechnician = currentUser?.jobRole === 'Tecnico' || currentUser?.role === 'Tecnico';
+  const currentUserFullName = `${currentUser?.firstName ?? ''} ${currentUser?.lastName ?? ''}`.trim();
 
   const filteredRows = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -19,9 +28,10 @@ export function MovementsPage() {
       const iso = row.date.split('/').reverse().join('-');
       const matchesFrom = !fromDate || iso >= fromDate;
       const matchesTo = !toDate || iso <= toDate;
-      return matchesKeyword && matchesFrom && matchesTo;
+      const matchesTechnician = !isTechnician || (currentUserFullName && row.technician === currentUserFullName);
+      return matchesKeyword && matchesFrom && matchesTo && matchesTechnician;
     });
-  }, [search, rows, fromDate, toDate]);
+  }, [search, rows, fromDate, toDate, isTechnician, currentUserFullName]);
 
   return (
     <section>
