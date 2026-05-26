@@ -59,7 +59,7 @@ h3 { margin: .8rem 0 .4rem; font-size: 1rem; }
 .action-green { background: linear-gradient(135deg,#16a34a,#15803d) !important; color: #fff !important; border-color: #15803d !important; }
 
 
-.scan-prompt { display:flex; gap:.35rem; align-items:center; margin:-.1rem 0 .45rem; font-size:10px; }
+.scan-prompt { display:flex; gap:.35rem; align-items:center; margin:-.1rem 0 .45rem; font-size:1.1rem; font-weight:400; }
 .scan-prompt button { border:1px solid #93c5fd; border-radius:.35rem; padding:.15rem .45rem; font-size:12px; font-weight:700; }
 .scan-prompt-yes { background:#16a34a; color:#fff; border-color:#15803d !important; }
 .scan-prompt-no { background:#dc2626; color:#fff; border-color:#b91c1c !important; }
