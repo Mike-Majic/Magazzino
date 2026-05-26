@@ -28,6 +28,9 @@ export function InventoryPage() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [currentUser, setCurrentUser] = useState<UserRow | null>(null);
 
+  const isTechnician = currentUser?.jobRole === 'Tecnico' || currentUser?.role === 'Tecnico';
+  const currentUserFullName = `${currentUser?.firstName ?? ''} ${currentUser?.lastName ?? ''}`.trim();
+
   useEffect(() => {
     (async () => {
       setRows(await loadTable('inventory_rows','inventory_rows',initialInventoryRows));
@@ -55,7 +58,10 @@ export function InventoryPage() {
     });
   };
 
-  const visible = useMemo(() => rows.filter(r => ['da_assegnare', 'assegnato'].includes(r.status)).filter(r => (!search || [r.serial, r.model, r.sap, r.notes, r.assignedTo, r.provenance, labels[r.status]].join(' ').toLowerCase().includes(search.toLowerCase())) && (!fromDate || r.createdAt >= fromDate) && (!toDate || r.createdAt <= toDate)), [rows, search, fromDate, toDate]);
+  const visible = useMemo(() => rows
+    .filter(r => ['da_assegnare', 'assegnato'].includes(r.status))
+    .filter((r) => !isTechnician || (currentUserFullName && r.assignedTo === currentUserFullName))
+    .filter(r => (!search || [r.serial, r.model, r.sap, r.notes, r.assignedTo, r.provenance, labels[r.status]].join(' ').toLowerCase().includes(search.toLowerCase())) && (!fromDate || r.createdAt >= fromDate) && (!toDate || r.createdAt <= toDate)), [rows, search, fromDate, toDate, isTechnician, currentUserFullName]);
   const daAssegnare = useMemo(() => applySort(visible.filter(r => r.status === 'da_assegnare')), [visible, sortField, sortDir]);
   const assegnati = useMemo(() => applySort(visible.filter(r => r.status === 'assegnato')), [visible, sortField, sortDir]);
 
