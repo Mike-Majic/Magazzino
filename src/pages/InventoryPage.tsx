@@ -7,15 +7,16 @@ const statuses: InventoryStatus[] = ['da_assegnare', 'assegnato', 'installato', 
 const labels: Record<InventoryStatus, string> = { da_assegnare: 'Da assegnare', assegnato: 'Assegnato', installato: 'Installato', da_riconsegnare: 'Da riconsegnare', riconsegnato: 'Riconsegnato', denunciato: 'Denunciato' };
 
 export function InventoryPage() {
-  const [rows, setRows] = useState<InventoryRow[]>(initialInventoryRows);
-  const [users, setUsers] = useState<UserRow[]>(seededUsers);
+  const [rows, setRows] = useState<InventoryRow[]>([]);
+  const [users, setUsers] = useState<UserRow[]>([]);
   const [companies, setCompanies] = useState(seededCompanies);
-  const [sapCatalog, setSapCatalog] = useState<SapItem[]>(defaultSapCatalog);
+  const [sapCatalog, setSapCatalog] = useState<SapItem[]>([]);
   const [search, setSearch] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [newRow, setNewRow] = useState<Omit<InventoryRow, 'id'>>({ serial: '', model: '', sap: '', status: 'da_assegnare', assignedTo: '-', provenance: 'SIELTE', notes: '', createdAt: new Date().toISOString().slice(0, 10) });
   const [movements, setMovements] = useState<MovementRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const attachmentPickerRef = useRef<HTMLInputElement>(null);
   const attachmentRowRef = useRef<number | null>(null);
   const serialInputRef = useRef<HTMLInputElement>(null);
@@ -37,6 +38,7 @@ export function InventoryPage() {
       setCompanies(await loadTable('companies_registry','companies_registry',seededCompanies));
       const sid = Number(localStorage.getItem('session_user_id') || 0);
       setCurrentUser(loadedUsers.find((u) => u.id === sid) ?? null);
+      setLoading(false);
     })();
   }, []);
 
@@ -62,17 +64,23 @@ export function InventoryPage() {
     if (sortField === field) setSortDir((d) => d === 'asc' ? 'desc' : 'asc');
     else { setSortField(field); setSortDir('asc'); }
   };
-  const isAdmin = currentUser?.role === 'Admin' || currentUser?.jobRole === 'Admin';
   const deleteRowAction = (row: InventoryRow) => {
-    if (!isAdmin) return;
-    const full = window.confirm('OK = cancella tutta la stringa. Annulla = scegli solo allegati');
-    if (full) { const next = rows.filter((r) => r.id !== row.id); persistRows(next); logMovement(row, 'Eliminazione riga'); return; }
-    const onlyAttachments = window.confirm('Vuoi cancellare solo gli allegati?');
-    if (onlyAttachments) {
-      const updated = { ...row, attachmentName: undefined, attachmentUrl: undefined, attachmentNames: [], attachmentUrls: [] };
-      persistRows(rows.map((r) => r.id === row.id ? updated : r));
-      logMovement(updated, 'Eliminazione allegati');
-    }
+    const full = window.confirm('Confermi eliminazione intera riga?');
+    if (!full) return;
+    const next = rows.filter((r) => r.id !== row.id);
+    persistRows(next);
+    logMovement(row, 'Eliminazione riga');
+  };
+  const deleteAttachmentAction = (row: InventoryRow, idx: number) => {
+    const urls = [ ...(row.attachmentUrls ?? (row.attachmentUrl ? [row.attachmentUrl] : [])) ];
+    const names = [ ...(row.attachmentNames ?? (row.attachmentName ? [row.attachmentName] : [])) ];
+    if (!urls[idx]) return;
+    if (!window.confirm('Confermi eliminazione allegato selezionato?')) return;
+    urls.splice(idx, 1);
+    names.splice(idx, 1);
+    const updated = { ...row, attachmentNames: urls.length ? names : [], attachmentUrls: urls.length ? urls : [], attachmentName: names[0], attachmentUrl: urls[0] };
+    persistRows(rows.map((r) => r.id === row.id ? updated : r));
+    logMovement(updated, 'Eliminazione allegato singolo');
   };
 
   const exportCsv = (list: InventoryRow[], name: string) => { const csv = buildCsv(['seriale','modello','sap','stato','assegnato','provenienza','note','data'], list.map(r => [r.serial, r.model, r.sap, labels[r.status], r.assignedTo, r.provenance, r.notes, r.createdAt])); downloadCsv(csv, name); };
@@ -112,6 +120,8 @@ export function InventoryPage() {
   const register = (e: FormEvent) => { e.preventDefault(); if (!newRow.serial) return; const row = { ...newRow, id: Date.now() }; const next = [row, ...rows]; persistRows(next); logMovement(row, 'Registrazione materiale'); setNewRow({ ...newRow, serial: '', model: '', sap: '', notes: '' }); };
   const onAttachmentChange = (event: ChangeEvent<HTMLInputElement>) => { const file = event.target.files?.[0]; const rowId = attachmentRowRef.current; if (!file || rowId === null) return; const fileUrl = URL.createObjectURL(file); const curr = rows.find(r => r.id === rowId); if (!curr) return; const names = [ ...(curr.attachmentNames ?? (curr.attachmentName ? [curr.attachmentName] : [])) ]; const urls = [ ...(curr.attachmentUrls ?? (curr.attachmentUrl ? [curr.attachmentUrl] : [])) ]; if (urls.length >= 3) { window.alert('Massimo 3 allegati per riga.'); event.target.value = ''; return; } names.push(file.name); urls.push(fileUrl); const updated = { ...curr, attachmentNames: names, attachmentUrls: urls, attachmentName: names[0], attachmentUrl: urls[0] }; const next = rows.map(r => r.id === rowId ? updated : r); persistRows(next); logMovement(updated, 'Aggiornamento allegato'); event.target.value = ''; };
 
+  if (loading) return <section><h2>Seriali materiali (da assegnare / assegnati)</h2><p>Caricamento dati...</p></section>;
+
   return <section><h2>Seriali materiali (da assegnare / assegnati)</h2>
     <div className='new-modem-form-titles'><span>Seriale</span><span>Descrizione materiale</span><span>SAP</span><span>Stato</span><span>Assegnato a</span><span>Provenienza</span><span>Note</span><span>Azione</span></div>
     <form className='new-modem-form' onSubmit={register}><input ref={serialInputRef} onFocus={() => setScanPromptVisible(true)} value={newRow.serial} onChange={e => setNewRow({ ...newRow, serial: e.target.value })} placeholder='Seriale'/><input value={newRow.model} onChange={e => setNewRow({ ...newRow, model: e.target.value })} placeholder='Descrizione materiale'/><input value={newRow.sap} onChange={e => { const sap = e.target.value.trim(); const f = sapCatalog.find(s => s.sapCode === sap); setNewRow({ ...newRow, sap, model: f ? f.modelName : '' }); }} placeholder='SAP'/><select value={newRow.status} onChange={e => setNewRow({ ...newRow, status: e.target.value as InventoryStatus })}>{statuses.map(s => <option key={s} value={s}>{labels[s]}</option>)}</select><select value={newRow.assignedTo} onChange={e => setNewRow({ ...newRow, assignedTo: e.target.value })}><option value='-'>-</option>{users.map(u => <option key={u.id} value={`${u.firstName} ${u.lastName}`}>{u.firstName} {u.lastName}</option>)}</select><select value={newRow.provenance} onChange={e => setNewRow({ ...newRow, provenance: e.target.value })}>{companies.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select><input value={newRow.notes} onChange={e => setNewRow({ ...newRow, notes: e.target.value })} placeholder='Note'/><button className='action-green' type='submit'>Registra materiale</button></form>
@@ -119,7 +129,7 @@ export function InventoryPage() {
     {scanPromptVisible && !scannerOpen && <div className='scan-prompt'><span>Vuoi scannerizzare?</span><button type='button' onClick={() => { setScanPromptVisible(false); openScanner(); }}>Si</button><button type='button' onClick={() => setScanPromptVisible(false)}>No</button></div>}
     {scannerOpen && <div className='scanner-overlay'><div className='scanner-box'><video ref={scannerVideoRef} autoPlay playsInline muted /><button type='button' onClick={stopScanner}>Chiudi scanner</button></div></div>}
     <input ref={attachmentPickerRef} type='file' accept='image/*' capture='environment' style={{ display: 'none' }} onChange={onAttachmentChange} />
-    <h3>Materiali - Da assegnare</h3><div className='table-wrap'><table className='compact-table with-separators inventory-table'><thead><tr><th onClick={() => onSort('serial')}>Seriale</th><th onClick={() => onSort('model')}>Modello</th><th onClick={() => onSort('sap')}>SAP</th><th onClick={() => onSort('status')}>Stato</th><th onClick={() => onSort('assignedTo')}>Assegnato a</th><th onClick={() => onSort('provenance')}>Provenienza</th><th onClick={() => onSort('notes')}>Note</th><th>Allegati</th></tr></thead><tbody>{daAssegnare.map(r => <tr key={r.id}><td>{r.serial}</td><td>{r.model}</td><td>{r.sap}</td><td><select value={r.status} onChange={e => onBlurConfirm(r.id, 'status', e.target.value)}>{statuses.map(s => <option key={s} value={s}>{labels[s]}</option>)}</select></td><td><select value={r.assignedTo} onChange={e => onBlurConfirm(r.id, 'assignedTo', e.target.value)}><option value='-'>-</option>{users.map(u => <option key={u.id} value={`${u.firstName} ${u.lastName}`}>{u.firstName} {u.lastName}</option>)}</select></td><td><select value={r.provenance} onChange={e => onBlurConfirm(r.id, 'provenance', e.target.value)}>{companies.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></td><td><input defaultValue={r.notes} onBlur={e => onBlurConfirm(r.id, 'notes', e.target.value)} /></td><td className='attachment-cell'><button type='button' className='icon-btn' onClick={() => { attachmentRowRef.current = r.id; attachmentPickerRef.current?.click(); }}>📎</button>{(r.attachmentUrls ?? (r.attachmentUrl ? [r.attachmentUrl] : [])).slice(0,3).map((url,idx)=><button key={url+idx} type='button' className='icon-btn' onClick={() => window.open(url, '_blank')}>👁️</button>)}{isAdmin && <button type='button' className='icon-btn danger' onClick={() => deleteRowAction(r)}>🗑️</button>}</td></tr>)}</tbody></table></div>
-    <h3>Materiali - Assegnati</h3><div className='table-wrap'><table className='compact-table with-separators inventory-table'><thead><tr><th onClick={() => onSort('serial')}>Seriale</th><th onClick={() => onSort('model')}>Modello</th><th onClick={() => onSort('sap')}>SAP</th><th onClick={() => onSort('status')}>Stato</th><th onClick={() => onSort('assignedTo')}>Assegnato a</th><th onClick={() => onSort('provenance')}>Provenienza</th><th onClick={() => onSort('notes')}>Note</th><th>Allegati</th></tr></thead><tbody>{assegnati.map(r => <tr key={r.id}><td>{r.serial}</td><td>{r.model}</td><td>{r.sap}</td><td><select value={r.status} onChange={e => onBlurConfirm(r.id, 'status', e.target.value)}>{statuses.map(s => <option key={s} value={s}>{labels[s]}</option>)}</select></td><td><select value={r.assignedTo} onChange={e => onBlurConfirm(r.id, 'assignedTo', e.target.value)}><option value='-'>-</option>{users.map(u => <option key={u.id} value={`${u.firstName} ${u.lastName}`}>{u.firstName} {u.lastName}</option>)}</select></td><td><select value={r.provenance} onChange={e => onBlurConfirm(r.id, 'provenance', e.target.value)}>{companies.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></td><td><input defaultValue={r.notes} onBlur={e => onBlurConfirm(r.id, 'notes', e.target.value)} /></td><td className='attachment-cell'><button type='button' className='icon-btn' onClick={() => { attachmentRowRef.current = r.id; attachmentPickerRef.current?.click(); }}>📎</button>{(r.attachmentUrls ?? (r.attachmentUrl ? [r.attachmentUrl] : [])).slice(0,3).map((url,idx)=><button key={url+idx} type='button' className='icon-btn' onClick={() => window.open(url, '_blank')}>👁️</button>)}{isAdmin && <button type='button' className='icon-btn danger' onClick={() => deleteRowAction(r)}>🗑️</button>}</td></tr>)}</tbody></table></div>
+    <h3>Materiali - Da assegnare</h3><div className='table-wrap'><table className='compact-table with-separators inventory-table'><thead><tr><th onClick={() => onSort('serial')}>Seriale</th><th onClick={() => onSort('model')}>Modello</th><th onClick={() => onSort('sap')}>SAP</th><th onClick={() => onSort('status')}>Stato</th><th onClick={() => onSort('assignedTo')}>Assegnato a</th><th onClick={() => onSort('provenance')}>Provenienza</th><th onClick={() => onSort('notes')}>Note</th><th>Allegati</th></tr></thead><tbody>{daAssegnare.map(r => <tr key={r.id}><td>{r.serial}</td><td>{r.model}</td><td>{r.sap}</td><td><select value={r.status} onChange={e => onBlurConfirm(r.id, 'status', e.target.value)}>{statuses.map(s => <option key={s} value={s}>{labels[s]}</option>)}</select></td><td><select value={r.assignedTo} onChange={e => onBlurConfirm(r.id, 'assignedTo', e.target.value)}><option value='-'>-</option>{users.map(u => <option key={u.id} value={`${u.firstName} ${u.lastName}`}>{u.firstName} {u.lastName}</option>)}</select></td><td><select value={r.provenance} onChange={e => onBlurConfirm(r.id, 'provenance', e.target.value)}>{companies.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></td><td><input defaultValue={r.notes} onBlur={e => onBlurConfirm(r.id, 'notes', e.target.value)} /></td><td className='attachment-cell'><button type='button' className='icon-btn' onClick={() => { attachmentRowRef.current = r.id; attachmentPickerRef.current?.click(); }}>📎</button>{(r.attachmentUrls ?? (r.attachmentUrl ? [r.attachmentUrl] : [])).slice(0,3).map((url,idx)=><span key={url+idx}><button type='button' className='icon-btn' onClick={() => window.open(url, '_blank')}>👁️</button><button type='button' className='icon-btn danger' onClick={() => deleteAttachmentAction(r, idx)}>✖️</button></span>)}<button type='button' className='icon-btn danger' onClick={() => deleteRowAction(r)}>🗑️</button></td></tr>)}</tbody></table></div>
+    <h3>Materiali - Assegnati</h3><div className='table-wrap'><table className='compact-table with-separators inventory-table'><thead><tr><th onClick={() => onSort('serial')}>Seriale</th><th onClick={() => onSort('model')}>Modello</th><th onClick={() => onSort('sap')}>SAP</th><th onClick={() => onSort('status')}>Stato</th><th onClick={() => onSort('assignedTo')}>Assegnato a</th><th onClick={() => onSort('provenance')}>Provenienza</th><th onClick={() => onSort('notes')}>Note</th><th>Allegati</th></tr></thead><tbody>{assegnati.map(r => <tr key={r.id}><td>{r.serial}</td><td>{r.model}</td><td>{r.sap}</td><td><select value={r.status} onChange={e => onBlurConfirm(r.id, 'status', e.target.value)}>{statuses.map(s => <option key={s} value={s}>{labels[s]}</option>)}</select></td><td><select value={r.assignedTo} onChange={e => onBlurConfirm(r.id, 'assignedTo', e.target.value)}><option value='-'>-</option>{users.map(u => <option key={u.id} value={`${u.firstName} ${u.lastName}`}>{u.firstName} {u.lastName}</option>)}</select></td><td><select value={r.provenance} onChange={e => onBlurConfirm(r.id, 'provenance', e.target.value)}>{companies.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></td><td><input defaultValue={r.notes} onBlur={e => onBlurConfirm(r.id, 'notes', e.target.value)} /></td><td className='attachment-cell'><button type='button' className='icon-btn' onClick={() => { attachmentRowRef.current = r.id; attachmentPickerRef.current?.click(); }}>📎</button>{(r.attachmentUrls ?? (r.attachmentUrl ? [r.attachmentUrl] : [])).slice(0,3).map((url,idx)=><span key={url+idx}><button type='button' className='icon-btn' onClick={() => window.open(url, '_blank')}>👁️</button><button type='button' className='icon-btn danger' onClick={() => deleteAttachmentAction(r, idx)}>✖️</button></span>)}<button type='button' className='icon-btn danger' onClick={() => deleteRowAction(r)}>🗑️</button></td></tr>)}</tbody></table></div>
   </section>;
 }
