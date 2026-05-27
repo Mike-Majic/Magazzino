@@ -72,6 +72,11 @@ export function InventoryPage() {
     else { setSortField(field); setSortDir('asc'); }
   };
   const deleteRowAction = (row: InventoryRow) => {
+    const isAdmin = currentUser?.jobRole === 'Admin' || currentUser?.role === 'Admin';
+    if (!isAdmin) {
+      window.alert('Solo un utente Admin può eliminare una riga.');
+      return;
+    }
     const full = window.confirm('Confermi eliminazione intera riga?');
     if (!full) return;
     const next = rows.filter((r) => r.id !== row.id);
