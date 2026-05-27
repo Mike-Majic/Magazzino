@@ -26,6 +26,12 @@ export function App() {
   const [menuOpen, setMenuOpen] = useState(true);
   const [authReady, setAuthReady] = useState(false);
   const [authMessage, setAuthMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [helpName, setHelpName] = useState('');
+  const [helpEmail, setHelpEmail] = useState('');
+  const [helpNotes, setHelpNotes] = useState('');
+  const [helpMessage, setHelpMessage] = useState('');
 
   useEffect(() => {
     const init = async () => {
@@ -83,23 +89,54 @@ export function App() {
   };
 
   const resetPassword = async () => {
-    if (!email) return;
+    const targetEmail = 'm.colurci@gmail.com';
     if (supabase) {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+      const { error } = await supabase.auth.resetPasswordForEmail(targetEmail);
       if (error) {
         if (error.message.toLowerCase().includes('security purposes')) {
           return setAuthMessage('Troppi tentativi: attendi ~20 secondi e riprova.');
         }
         return setAuthMessage(error.message);
       }
-      return window.alert('Email reset inviata');
+      return window.alert(`Email reset inviata a ${targetEmail}`);
     }
     setAuthMessage('Reset disponibile solo con Supabase configurato.');
   };
 
+  const sendHelpRequest = async () => {
+    if (!helpName.trim() || !helpEmail.trim() || !helpNotes.trim()) {
+      setHelpMessage('Compila tutti i campi della richiesta aiuto.');
+      return;
+    }
+    const helpPayload = {
+      id: Date.now(),
+      fullName: helpName.trim(),
+      email: helpEmail.trim(),
+      notes: helpNotes.trim(),
+      createdAt: new Date().toISOString()
+    };
+    if (supabase) {
+      const { error } = await supabase.from('help_requests').insert(helpPayload);
+      if (error) {
+        setHelpMessage(`Errore invio richiesta: ${error.message}`);
+        return;
+      }
+    } else {
+      const prev = localStorage.getItem('help_requests');
+      const list = prev ? JSON.parse(prev) : [];
+      localStorage.setItem('help_requests', JSON.stringify([...list, helpPayload]));
+    }
+    setHelpMessage('Richiesta inviata con successo.');
+    setShowHelpModal(false);
+    setHelpName('');
+    setHelpEmail('');
+    setHelpNotes('');
+    setTimeout(() => setHelpMessage(''), 2500);
+  };
+
   const logout = () => { setSessionId(null); localStorage.removeItem('session_user_id'); if (supabase) supabase.auth.signOut(); };
 
-  if (!activeUser) return <main className='login-shell'><header className='app-banner'>GESTIONE MAGAZZINO</header><div className='login-page'><div className='login-card dark-login'><h2>Accesso</h2><form onSubmit={login} className='login-form'><label>Email</label><input placeholder='nome@email.it' type='email' value={email} onChange={(e)=>setEmail(e.target.value)} /><label>Password</label><div className='password-wrap'><input placeholder='Password' type='password' value={password} onChange={(e)=>setPassword(e.target.value)} /></div>{canShowRegistration && <><input placeholder='Nome' value={firstName} onChange={e=>setFirstName(e.target.value)} /><input placeholder='Cognome' value={lastName} onChange={e=>setLastName(e.target.value)} /></>}{authMessage && <p className='auth-message'>{authMessage}</p>}<div className='login-grid'><button type='submit' className='btn-green' disabled={!authReady}>{authReady ? 'Login' : 'Caricamento...'}</button>{canShowRegistration && <button type='button' className='btn-orange' onClick={register}>Compila registrazione</button>}<button type='button' className='btn-blue' onClick={resetPassword}>Richiedi reset password</button><button type='button' className='btn-gray' onClick={()=>window.alert('Contatta admin di sistema')}>AIUTO</button></div></form></div></div></main>;
+  if (!activeUser) return <main className='login-shell'><header className='app-banner'>GESTIONE MAGAZZINO</header><div className='login-page'><div className='login-card dark-login'><h2>Accesso</h2><form onSubmit={login} className='login-form'><label>Email</label><input placeholder='nome@email.it' type='email' value={email} onChange={(e)=>setEmail(e.target.value)} /><label>Password</label><div className='password-wrap'><input placeholder='Password' type={showPassword ? 'text' : 'password'} value={password} onChange={(e)=>setPassword(e.target.value)} /><button type='button' className='password-toggle' onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? 'Nascondi password' : 'Mostra password'}>{showPassword ? '🙈' : '👁️'}</button></div>{canShowRegistration && <><input placeholder='Nome' value={firstName} onChange={e=>setFirstName(e.target.value)} /><input placeholder='Cognome' value={lastName} onChange={e=>setLastName(e.target.value)} /></>}{authMessage && <p className='auth-message'>{authMessage}</p>}{helpMessage && <p className='auth-message'>{helpMessage}</p>}<div className='login-grid'><button type='submit' className='btn-green' disabled={!authReady}>{authReady ? 'Login' : 'Caricamento...'}</button>{canShowRegistration && <button type='button' className='btn-orange' onClick={register}>Compila registrazione</button>}<button type='button' className='btn-blue' onClick={resetPassword}>Richiedi reset password</button><button type='button' className='btn-gray' onClick={()=>setShowHelpModal(true)}>AIUTO</button></div></form></div>{showHelpModal && <div className='help-overlay'><div className='help-card'><h3>Richiesta aiuto</h3><label>Nome e cognome</label><input value={helpName} onChange={(e)=>setHelpName(e.target.value)} placeholder='Nome e cognome' /><label>Mail</label><input type='email' value={helpEmail} onChange={(e)=>setHelpEmail(e.target.value)} placeholder='nome@email.it' /><label>Note</label><textarea value={helpNotes} onChange={(e)=>setHelpNotes(e.target.value)} placeholder='Scrivi qui il problema o la richiesta' rows={3} /><div className='help-actions'><button type='button' className='btn-green' onClick={sendHelpRequest}>Invia richiesta</button><button type='button' className='btn-gray' onClick={()=>setShowHelpModal(false)}>Chiudi</button></div></div></div>}</div></main>;
 
   return <div><header className='app-banner'>GESTIONE MAGAZZINO</header><div className='layout'><aside className='sidebar'><div className='sidebar-top'><BrandLogo compact /><div className='user-inline'><span>{activeUser.firstName} {activeUser.lastName}</span><button className='icon-btn' onClick={logout}>Logout</button></div></div><button type='button' className='sidebar-toggle' onClick={() => setMenuOpen((v) => !v)}>Magazzino <span>{menuOpen ? '▾' : '▸'}</span></button>{menuOpen && <nav>{navItems.filter((item) => item.to !== '/setup' || isAdmin).map((item)=><NavLink key={item.to} to={item.to} className={({isActive})=>(isActive?'active':'')}>{item.label}</NavLink>)}</nav>}</aside><main className='content'><Routes><Route path='/' element={<DashboardPage />} /><Route path='/inventory' element={<InventoryPage />} /><Route path='/movements' element={<MovementsPage />} /><Route path='/installed' element={<InstalledModemsPage />} /><Route path='/to-return' element={<ToReturnModemsPage />} /><Route path='/reported' element={<ReportedMaterialsPage />} /><Route path='/setup' element={isAdmin ? <SetupPage /> : <DashboardPage />} /></Routes></main></div></div>;
 }
