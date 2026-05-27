@@ -70,8 +70,18 @@ begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='movements_log' and policyname='movements_log_rw') then
     create policy movements_log_rw on public.movements_log for all to anon, authenticated using (true) with check (true);
   end if;
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='users_registry' and policyname='users_registry_rw') then
-    create policy users_registry_rw on public.users_registry for all to anon, authenticated using (true) with check (true);
+  -- Harden users_registry: never expose/write with anon key.
+  if exists (select 1 from pg_policies where schemaname='public' and tablename='users_registry' and policyname='users_registry_rw') then
+    drop policy users_registry_rw on public.users_registry;
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='users_registry' and policyname='users_registry_authenticated_select') then
+    create policy users_registry_authenticated_select on public.users_registry for select to authenticated using (true);
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='users_registry' and policyname='users_registry_authenticated_insert') then
+    create policy users_registry_authenticated_insert on public.users_registry for insert to authenticated with check (true);
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='users_registry' and policyname='users_registry_authenticated_update') then
+    create policy users_registry_authenticated_update on public.users_registry for update to authenticated using (true) with check (true);
   end if;
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='sap_catalog' and policyname='sap_catalog_rw') then
     create policy sap_catalog_rw on public.sap_catalog for all to anon, authenticated using (true) with check (true);
