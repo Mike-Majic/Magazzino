@@ -156,3 +156,8 @@ h3 { margin: .8rem 0 .4rem; font-size: 1rem; }
 .status-riconsegnato { background:#e0f2fe; color:#075985; border-color:#bae6fd; }
 .status-denunciato { background:#fee2e2; color:#991b1b; border-color:#fecaca; }
 @media (max-width: 900px) { .section-header { display:block; } .setup-tabs { display:grid; grid-template-columns:1fr; } }
+
+.status-switch { display:flex; gap:.45rem; flex-wrap:wrap; margin:0 0 .55rem; }
+.status-switch button { border:1px solid #cbd5e1; background:#fff; color:#334155; border-radius:999px; padding:.38rem .75rem; font-weight:800; cursor:pointer; }
+.status-switch button.active { background:#0f172a; border-color:#0f172a; color:#fff; box-shadow:0 8px 20px rgba(15,23,42,.18); }
+.empty-state { text-align:center; color:#64748b; font-weight:700; padding:1rem !important; white-space:normal; }

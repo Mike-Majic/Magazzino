@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { initialInventoryRows, InventoryRow, InventoryStatus, seededUsers, UserRow } from '../data';
 import { buildCsv, downloadCsv } from '../utils/csv';
 import { loadTable, saveTable } from '../lib/repo';
@@ -9,9 +9,11 @@ import { inventoryStatusLabels, inventoryStatuses } from '../constants/inventory
 
 
 export function ToReturnModemsPage() {
+  const navigate = useNavigate();
   const [rows, setRows] = useState<InventoryRow[]>(initialInventoryRows);
   const [searchParams] = useSearchParams();
   const statusParam = searchParams.get('status');
+  const isReturnedView = statusParam === 'riconsegnato';
   const [search, setSearch] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -35,7 +37,7 @@ export function ToReturnModemsPage() {
   const filtered = useMemo(
     () =>
       rows
-        .filter((r) => statusParam === 'riconsegnato' ? r.status === 'riconsegnato' : r.status === 'da_riconsegnare')
+        .filter((r) => isReturnedView ? r.status === 'riconsegnato' : r.status === 'da_riconsegnare')
         .filter((r) => !isTechnician || (currentUserFullName && r.assignedTo === currentUserFullName))
         .filter(
           (r) =>
@@ -43,17 +45,18 @@ export function ToReturnModemsPage() {
             (!fromDate || r.createdAt >= fromDate) &&
             (!toDate || r.createdAt <= toDate)
         ),
-    [rows, search, fromDate, toDate, statusParam, isTechnician, currentUserFullName]
+    [rows, search, fromDate, toDate, isReturnedView, isTechnician, currentUserFullName]
   );
 
   const exp = () => {
     const csv = buildCsv(['seriale','modello','sap','stato','tecnico','provenienza','note','data'], filtered.map((r) => [r.serial, r.model, r.sap, inventoryStatusLabels[r.status], r.assignedTo, r.provenance, r.notes, r.createdAt]));
-    downloadCsv(csv, statusParam === 'riconsegnato' ? 'riconsegnati.csv' : 'da_riconsegnare.csv');
+    downloadCsv(csv, isReturnedView ? 'riconsegnati.csv' : 'da_riconsegnare.csv');
   };
 
   return (
     <section>
-      <h2>{statusParam === 'riconsegnato' ? 'Materiale riconsegnato' : 'Materiali da riconsegnare'}</h2>
+      <div className="section-header"><h2>{isReturnedView ? 'Materiale riconsegnato' : 'Materiali da riconsegnare'}</h2><p>{filtered.length} materiali trovati</p></div>
+      <div className="status-switch" aria-label="Vista riconsegne"><button type="button" className={!isReturnedView ? 'active' : ''} onClick={() => navigate('/to-return')}>Da riconsegnare</button><button type="button" className={isReturnedView ? 'active' : ''} onClick={() => navigate('/to-return?status=riconsegnato')}>Riconsegnato</button></div>
       <div className="filters-row modern-filters">
         <input className="search-input" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Filtro seriale/modello..." />
         <input type="date" className="modern-input" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
@@ -65,6 +68,7 @@ export function ToReturnModemsPage() {
           <tr><th>Seriale</th><th>Modello</th><th>SAP</th><th>Stato</th><th>Tecnico</th><th>Note</th></tr>
         </thead>
         <tbody>
+          {filtered.length === 0 && <tr><td colSpan={6} className="empty-state">Nessun materiale trovato per questa vista. Prova a cambiare filtri o stato.</td></tr>}
           {filtered.map((r) => (
             <tr key={r.id}>
               <td>{r.serial}</td><td>{r.model}</td><td>{r.sap}</td>
