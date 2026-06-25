@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { initialInventoryRows, InventoryRow, InventoryStatus, seededUsers, UserRow } from '../data';
 import { buildCsv, downloadCsv } from '../utils/csv';
 import { loadTable, saveTable } from '../lib/repo';
+import { inventoryStatusLabels, inventoryStatuses } from '../constants/inventory';
 
-const labels: Record<InventoryStatus, string> = { da_assegnare: 'Da assegnare', assegnato: 'Assegnato', installato: 'Installato', da_riconsegnare: 'Da riconsegnare', riconsegnato: 'Riconsegnato', denunciato: 'Denunciato' };
-const statuses: InventoryStatus[] = ['da_assegnare', 'assegnato', 'installato', 'da_riconsegnare', 'riconsegnato', 'denunciato'];
+
 
 export function InstalledModemsPage() {
   const [rows, setRows] = useState<InventoryRow[]>(initialInventoryRows);
@@ -43,7 +43,7 @@ export function InstalledModemsPage() {
   );
 
   const exp = () => {
-    const csv = buildCsv(['seriale','modello','sap','stato','tecnico','provenienza','note','data'], filtered.map((r) => [r.serial, r.model, r.sap, labels[r.status], r.assignedTo, r.provenance, r.notes, r.createdAt]));
+    const csv = buildCsv(['seriale','modello','sap','stato','tecnico','provenienza','note','data'], filtered.map((r) => [r.serial, r.model, r.sap, inventoryStatusLabels[r.status], r.assignedTo, r.provenance, r.notes, r.createdAt]));
     downloadCsv(csv, 'installati.csv');
   };
 
@@ -66,7 +66,7 @@ export function InstalledModemsPage() {
               <td>{r.serial}</td><td>{r.model}</td><td>{r.sap}</td>
               <td>
                 <select value={r.status} onChange={(e) => persist(rows.map((x) => (x.id === r.id ? { ...x, status: e.target.value as InventoryStatus } : x)))}>
-                  {statuses.map((s) => <option key={s} value={s}>{labels[s]}</option>)}
+                  {inventoryStatuses.map((s) => <option key={s} value={s}>{inventoryStatusLabels[s]}</option>)}
                 </select>
               </td>
               <td>{r.assignedTo}</td><td>{r.provenance}</td><td>{r.notes}</td>
