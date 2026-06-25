@@ -53,7 +53,7 @@ export function ToReturnModemsPage() {
 
   return (
     <section>
-      <h2>{statusParam === 'riconsegnato' ? 'Materiali riconsegnati' : 'Materiali da riconsegnare'}</h2>
+      <h2>{statusParam === 'riconsegnato' ? 'Materiale riconsegnato' : 'Materiali da riconsegnare'}</h2>
       <div className="filters-row modern-filters">
         <input className="search-input" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Filtro seriale/modello..." />
         <input type="date" className="modern-input" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
